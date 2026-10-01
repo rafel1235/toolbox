@@ -6,29 +6,37 @@ import { rotatePages } from '../tools/rotate/rotate.js';
 import { mergePdfs } from '../tools/merge/merge.js';
 import { splitPdf } from '../tools/split/split.js';
 import { reorderPages } from '../tools/reorder/reorder.js';
+import { imagesToPdf } from '../tools/images-to-pdf/images-to-pdf.js';
 
 export function initDropzone() {
     const dropzone = document.getElementById('dropzone');
     const fileInput = document.getElementById('file-input');
     
-    // UI Singolo File
+    // UI Singolo File PDF
     const fileInfoPanel = document.getElementById('file-info');
     const fileNameDisplay = document.getElementById('file-name');
     const fileSizeDisplay = document.getElementById('file-size');
     const filePagesDisplay = document.getElementById('file-pages');
     
-    // UI Multi File
+    // UI Multi File PDF
     const multiFileInfo = document.getElementById('multi-file-info');
     const fileListUi = document.getElementById('file-list-ui');
+
+    // UI Immagini
+    const imageInfoPanel = document.getElementById('image-info');
+    const imageListUi = document.getElementById('image-list-ui');
     
     // Bottoni Tools
     const btnExtract = document.getElementById('btn-extract');
     const btnDelete = document.getElementById('btn-delete');
     const btnRotate = document.getElementById('btn-rotate');
     const btnMerge = document.getElementById('btn-merge');
-    const btnClear = document.getElementById('btn-clear');
     const btnSplit = document.getElementById('btn-split');
     const btnReorder = document.getElementById('btn-reorder');
+    const btnImagesToPdf = document.getElementById('btn-images-to-pdf');
+    
+    // Bottoni di pulizia coda (ora multipli)
+    const clearButtons = document.querySelectorAll('.btn-clear');
 
     let currentOriginalFiles = [];
     let maxPages = 0;
@@ -57,9 +65,20 @@ export function initDropzone() {
     async function processFiles(newFiles) {
         currentOriginalFiles = [...currentOriginalFiles, ...newFiles];
 
-        if (currentOriginalFiles.length === 1) {
-            // Mostra UI singolo file
-            multiFileInfo.style.display = 'none';
+        // Controlliamo se ci sono immagini nella coda
+        const isImageMode = currentOriginalFiles.some(f => f.type.startsWith('image/'));
+
+        // Nascondiamo tutti i pannelli
+        fileInfoPanel.style.display = 'none';
+        multiFileInfo.style.display = 'none';
+        if (imageInfoPanel) imageInfoPanel.style.display = 'none';
+
+        if (isImageMode) {
+            // LOGICA IMMAGINI
+            if (imageInfoPanel) imageInfoPanel.style.display = 'block';
+            renderFileList(imageListUi);
+        } else if (currentOriginalFiles.length === 1) {
+            // LOGICA SINGOLO PDF
             fileInfoPanel.style.display = 'block';
             
             const file = currentOriginalFiles[0];
@@ -78,17 +97,16 @@ export function initDropzone() {
                 document.getElementById('rotate-page').max = maxPages;
             }
         } else if (currentOriginalFiles.length > 1) {
-            // Mostra UI multi-file
-            fileInfoPanel.style.display = 'none';
+            // LOGICA MULTI PDF (Merge)
             multiFileInfo.style.display = 'block';
-            
-            renderFileList();
+            renderFileList(fileListUi);
         }
     }
 
-    // --- 3. DRAG & DROP DELLA LISTA FILE (MERGE) ---
-    function renderFileList() {
-        fileListUi.innerHTML = '';
+    // --- 3. DRAG & DROP DELLA LISTA FILE (MERGE E IMMAGINI) ---
+    function renderFileList(listContainer) {
+        if (!listContainer) return;
+        listContainer.innerHTML = '';
         
         currentOriginalFiles.forEach((file, index) => {
             const li = document.createElement('li');
@@ -120,11 +138,11 @@ export function initDropzone() {
                 if (fromIndex !== toIndex && !isNaN(fromIndex)) {
                     const movedItem = currentOriginalFiles.splice(fromIndex, 1)[0];
                     currentOriginalFiles.splice(toIndex, 0, movedItem);
-                    renderFileList();
+                    renderFileList(listContainer);
                 }
             });
 
-            fileListUi.appendChild(li);
+            listContainer.appendChild(li);
         });
     }
 
@@ -134,6 +152,17 @@ export function initDropzone() {
     }
 
     // --- 4. ASSEGNAZIONE BOTTONI TOOLS ---
+
+    // Tool: Svuota Coda (Gestisce entrambi i pulsanti)
+    clearButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            currentOriginalFiles = [];
+            fileInput.value = "";
+            multiFileInfo.style.display = 'none';
+            fileInfoPanel.style.display = 'none';
+            if (imageInfoPanel) imageInfoPanel.style.display = 'none';
+        });
+    });
 
     // Tool: Unisci (Merge)
     btnMerge.addEventListener('click', async () => {
@@ -155,13 +184,23 @@ export function initDropzone() {
         }
     });
 
-    // Tool: Svuota Coda
-    btnClear.addEventListener('click', () => {
-        currentOriginalFiles = [];
-        fileInput.value = "";
-        multiFileInfo.style.display = 'none';
-        fileInfoPanel.style.display = 'none';
-    });
+    // Tool: Immagini a PDF
+    if (btnImagesToPdf) {
+        btnImagesToPdf.addEventListener('click', async () => {
+            btnImagesToPdf.textContent = "Creazione in corso...";
+            btnImagesToPdf.disabled = true;
+            try {
+                const newPdfBytes = await imagesToPdf(currentOriginalFiles);
+                downloadPdf(newPdfBytes, 'Immagini_Convertite.pdf');
+            } catch (error) {
+                console.error(error);
+                alert("Errore durante la conversione delle immagini.");
+            } finally {
+                btnImagesToPdf.textContent = "Crea PDF dalle Immagini";
+                btnImagesToPdf.disabled = false;
+            }
+        });
+    }
 
     // Tool: Estrai
     btnExtract.addEventListener('click', async () => {
@@ -228,10 +267,9 @@ export function initDropzone() {
         finally { btnRotate.textContent = "Ruota"; }
     });
 
-    // --- TOOL: RIORDINA (Reorder) ---
+    // Tool: Riordina (Reorder)
     btnReorder.addEventListener('click', async () => {
         const input = document.getElementById('reorder-pages').value;
-        // Convertiamo la stringa "3, 1, 2" in un array [3, 1, 2], scartando valori non numerici o fuori range
         const pagesArray = input.split(',')
             .map(n => parseInt(n.trim()))
             .filter(n => !isNaN(n) && n >= 1 && n <= maxPages);
@@ -246,8 +284,6 @@ export function initDropzone() {
         try {
             const freshDoc = await getFreshPdfDocument(currentOriginalFiles[0]);
             const newPdfBytes = await reorderPages(freshDoc, pagesArray);
-            
-            // Scarichiamo il PDF riordinato
             downloadPdf(newPdfBytes, `riordinato_${currentOriginalFiles[0].name}`);
         } catch (error) { 
             console.error(error);
