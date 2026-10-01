@@ -18,77 +18,104 @@
 
     <main>
         <div id="dropzone" class="file-dropzone">
-            <p>Trascina qui i tuoi PDF o le tue Immagini (JPG/PNG) oppure clicca per selezionarli</p>
-            <!-- Aggiunti i formati immagine supportati -->
+            <div class="dropzone-content">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#007bff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 10px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+                <p>Trascina qui i tuoi <strong>PDF</strong> o <strong>Immagini</strong> (JPG/PNG)<br>oppure clicca per selezionarli</p>
+            </div>
             <input type="file" id="file-input" accept="application/pdf, image/jpeg, image/png" multiple hidden>
         </div>
 
         <!-- VISTA SINGOLO FILE PDF -->
         <div id="file-info" class="file-info" style="display: none;">
-            <h3>Dettagli File:</h3>
-            <p id="file-name"></p>
-            <p id="file-size"></p>
-            <p id="file-pages"></p>
-            
-            <hr style="margin: 15px 0;">
-            
-            <div id="tools-section">
-                <div style="margin-bottom: 20px;">
-                    <h4>Estrai Pagine</h4>
-                    <label>Da:</label> <input type="number" id="start-page" min="1" value="1" style="width: 50px;">
-                    <label>A:</label> <input type="number" id="end-page" min="1" style="width: 50px;">
-                    <button id="btn-extract">Estrai</button>
+            <div class="file-header">
+                <h3>Documento Attivo</h3>
+                <div class="file-badges">
+                    <span id="file-name" class="badge badge-primary"></span>
+                    <span id="file-size" class="badge badge-secondary"></span>
+                    <span id="file-pages" class="badge badge-info"></span>
                 </div>
+            </div>
+            
+            <!-- GRIGLIA STRUMENTI (Nuovo Layout) -->
+            <div id="tools-section" class="tools-grid">
                 
-                <div style="margin-bottom: 20px;">
-                    <h4>Dividi in Pagine Singole</h4>
-                    <button id="btn-split">Dividi e Scarica ZIP</button>
+                <div class="tool-card">
+                    <h4>Estrai Pagine</h4>
+                    <p class="tool-desc">Salva un intervallo specifico di pagine in un nuovo PDF.</p>
+                    <div class="tool-controls">
+                        <label>Da:</label> <input type="number" id="start-page" min="1" value="1" class="input-small">
+                        <label>A:</label> <input type="number" id="end-page" min="1" class="input-small">
+                    </div>
+                    <button id="btn-extract" class="btn btn-primary">Estrai</button>
                 </div>
 
-                <div style="margin-bottom: 20px;">
-                    <h4>Riordina Pagine</h4>
-                    <label>Nuovo ordine (es. 3, 1, 2):</label> 
-                    <input type="text" id="reorder-pages" placeholder="es. 3, 1, 2" style="width: 150px;">
-                    <button id="btn-reorder">Riordina</button>
+                <div class="tool-card">
+                    <h4>Dividi (Split)</h4>
+                    <p class="tool-desc">Estrae ogni pagina del documento come PDF separato.</p>
+                    <div class="tool-controls">
+                        <span style="font-size: 0.85em; color: #555;">(Scarica un archivio .zip)</span>
+                    </div>
+                    <button id="btn-split" class="btn btn-primary">Dividi e Scarica ZIP</button>
                 </div>
 
-                <div style="margin-bottom: 20px;">
+                <div class="tool-card">
                     <h4>Elimina Pagine</h4>
-                    <label>Pagine (es. 1, 3):</label> <input type="text" id="delete-pages" style="width: 100px;">
-                    <button id="btn-delete">Elimina</button>
+                    <p class="tool-desc">Rimuovi le pagine indesiderate dal documento.</p>
+                    <div class="tool-controls">
+                        <label>Pagine:</label> <input type="text" id="delete-pages" placeholder="es. 1, 3" class="input-medium">
+                    </div>
+                    <button id="btn-delete" class="btn btn-danger">Elimina</button>
                 </div>
 
-                <div>
-                    <h4>Ruota Pagine</h4>
-                    <select id="rotate-degrees">
-                        <option value="90">90° a Destra</option>
-                        <option value="-90">90° a Sinistra</option>
-                        <option value="180">180°</option>
-                    </select>
-                    <label>Pag.:</label> <input type="number" id="rotate-page" min="1" style="width: 70px;">
-                    <button id="btn-rotate">Ruota</button>
+                <div class="tool-card">
+                    <h4>Riordina Pagine</h4>
+                    <p class="tool-desc">Crea un nuovo PDF cambiando l'ordine delle pagine.</p>
+                    <div class="tool-controls">
+                        <label>Ordine:</label> <input type="text" id="reorder-pages" placeholder="es. 3, 1, 2" class="input-medium">
+                    </div>
+                    <button id="btn-reorder" class="btn btn-primary">Riordina</button>
                 </div>
+
+                <div class="tool-card">
+                    <h4>Ruota Pagine</h4>
+                    <p class="tool-desc">Ruota l'intero documento o una singola pagina.</p>
+                    <div class="tool-controls">
+                        <select id="rotate-degrees" class="input-medium">
+                            <option value="90">90° Destra</option>
+                            <option value="-90">90° Sinistra</option>
+                            <option value="180">180°</option>
+                        </select>
+                        <input type="number" id="rotate-page" min="1" placeholder="Tutte" class="input-small">
+                    </div>
+                    <button id="btn-rotate" class="btn btn-primary">Ruota</button>
+                </div>
+
             </div>
         </div>
 
         <!-- VISTA MULTI FILE (Merge PDF) -->
         <div id="multi-file-info" class="file-info" style="display: none;">
-            <h3>Coda di Unione (Merge PDF):</h3>
+            <div class="file-header">
+                <h3>Coda di Unione (Merge PDF)</h3>
+                <p class="tool-desc">Trascina i file per riordinarli. Verranno uniti dall'alto verso il basso.</p>
+            </div>
             <ul id="file-list-ui" class="file-list"></ul>
-            <div style="margin-top: 15px;">
-                <button id="btn-merge" style="padding: 10px 20px; font-weight: bold;">Unisci tutti i PDF</button>
-                <button id="btn-clear" class="btn-clear" style="padding: 10px 20px; margin-left: 10px; background-color: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">Svuota coda</button>
+            <div class="action-bar">
+                <button id="btn-merge" class="btn btn-success">Unisci tutti i PDF</button>
+                <button id="btn-clear" class="btn btn-outline btn-clear">Svuota coda</button>
             </div>
         </div>
 
-        <!-- NUOVA VISTA IMMAGINI -->
+        <!-- VISTA IMMAGINI -->
         <div id="image-info" class="file-info" style="display: none;">
-            <h3>Coda Immagini (Converti in PDF):</h3>
-            <p style="font-size: 0.85em; color: #666;">Trascina le immagini per riordinarle. Verrà creata una pagina per ogni immagine.</p>
+            <div class="file-header">
+                <h3>Coda Immagini</h3>
+                <p class="tool-desc">Trascina le immagini per riordinarle. Verrà creata una pagina per ogni immagine.</p>
+            </div>
             <ul id="image-list-ui" class="file-list"></ul>
-            <div style="margin-top: 15px;">
-                <button id="btn-images-to-pdf" style="padding: 10px 20px; font-weight: bold;">Crea PDF dalle Immagini</button>
-                <button id="btn-clear-images" class="btn-clear" style="padding: 10px 20px; margin-left: 10px; background-color: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">Svuota coda</button>
+            <div class="action-bar">
+                <button id="btn-images-to-pdf" class="btn btn-success">Crea PDF dalle Immagini</button>
+                <button id="btn-clear-images" class="btn btn-outline btn-clear">Svuota coda</button>
             </div>
         </div>
     </main>
