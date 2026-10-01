@@ -48,10 +48,10 @@ pdf-toolbox/
 │   │   ├── tools/
 │   │   │   │
 │   │   │   ├── merge/
-│   │   │   │   └── merge.js
+│   │   │   │   └── merge.js @
 │   │   │   │
 │   │   │   ├── split/
-│   │   │   │   └── split.js
+│   │   │   │   └── split.js @
 │   │   │   │
 │   │   │   ├── compress/
 │   │   │   │   └── compress.js

@@ -51,3 +51,25 @@
     justify-content: space-between;
     align-items: center;
 }
+
+/* --- Aggiunte per il Drag & Drop della Lista File --- */
+.file-list li {
+    cursor: grab; /* Mostra la "manina" per indicare che è trascinabile */
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+.file-list li:active {
+    cursor: grabbing;
+}
+
+/* Stile applicato all'elemento che si sta trascinando */
+.file-list li.dragging {
+    opacity: 0.5;
+    background-color: #e2e6ea;
+}
+
+/* Stile applicato al "bersaglio" sotto l'elemento trascinato */
+.file-list li.drag-over {
+    border-top: 3px solid #007bff;
+    margin-top: 10px; /* Crea uno spazio visivo */
+}

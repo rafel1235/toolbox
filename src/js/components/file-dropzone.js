@@ -4,10 +4,13 @@ import { extractPages } from '../tools/extract/extract.js';
 import { deletePages } from '../tools/delete-pages/delete-pages.js';
 import { rotatePages } from '../tools/rotate/rotate.js';
 import { mergePdfs } from '../tools/merge/merge.js';
+import { downloadPdf, downloadBlob } from '../core/download.js'; // Aggiungi downloadBlob
+import { splitPdf } from '../tools/split/split.js'; // Nuovo import
 
 export function initDropzone() {
     const dropzone = document.getElementById('dropzone');
     const fileInput = document.getElementById('file-input');
+    const btnSplit = document.getElementById('btn-split');
     
     // UI Singolo File
     const fileInfoPanel = document.getElementById('file-info');
@@ -44,7 +47,6 @@ export function initDropzone() {
     });
 
     async function processFiles(newFiles) {
-        // Aggiungiamo i nuovi file all'array globale
         currentOriginalFiles = [...currentOriginalFiles, ...newFiles];
 
         if (currentOriginalFiles.length === 1) {
@@ -72,14 +74,66 @@ export function initDropzone() {
             fileInfoPanel.style.display = 'none';
             multiFileInfo.style.display = 'block';
             
-            // Aggiorniamo la lista visuale
-            fileListUi.innerHTML = '';
-            currentOriginalFiles.forEach((f, index) => {
-                const li = document.createElement('li');
-                li.textContent = `${index + 1}. ${f.name}`;
-                fileListUi.appendChild(li);
-            });
+            // Usiamo la nuova funzione per generare la lista riordinabile
+            renderFileList();
         }
+    }
+
+    // Nuova funzione per generare la lista interattiva
+    function renderFileList() {
+        fileListUi.innerHTML = '';
+        
+        currentOriginalFiles.forEach((file, index) => {
+            const li = document.createElement('li');
+            li.textContent = `${index + 1}. ${file.name}`;
+            li.draggable = true; // Rende l'elemento trascinabile
+            li.dataset.index = index; // Salviamo l'indice originale nell'HTML
+
+            // 1. Inizio trascinamento
+            li.addEventListener('dragstart', (e) => {
+                li.classList.add('dragging');
+                // Salviamo l'indice dell'elemento che stiamo spostando
+                e.dataTransfer.setData('text/plain', index);
+            });
+
+            // 2. Fine trascinamento
+            li.addEventListener('dragend', () => {
+                li.classList.remove('dragging');
+            });
+
+            // 3. Quando si passa sopra un altro elemento
+            li.addEventListener('dragover', (e) => {
+                e.preventDefault(); // Necessario per permettere il drop
+                li.classList.add('drag-over');
+            });
+
+            // 4. Quando si esce dall'area di un altro elemento
+            li.addEventListener('dragleave', () => {
+                li.classList.remove('drag-over');
+            });
+
+            // 5. Rilascio (Drop)
+            li.addEventListener('drop', (e) => {
+                e.preventDefault();
+                li.classList.remove('drag-over');
+                
+                // Recuperiamo l'indice di origine
+                const fromIndex = parseInt(e.dataTransfer.getData('text/plain'));
+                const toIndex = index; // Indice di destinazione (quello su cui abbiamo rilasciato)
+
+                // Se l'elemento è stato effettivamente spostato in una posizione diversa
+                if (fromIndex !== toIndex && !isNaN(fromIndex)) {
+                    // Spostiamo l'elemento nell'array JavaScript
+                    const movedItem = currentOriginalFiles.splice(fromIndex, 1)[0];
+                    currentOriginalFiles.splice(toIndex, 0, movedItem);
+                    
+                    // Ridisegniamo la lista con il nuovo ordine
+                    renderFileList();
+                }
+            });
+
+            fileListUi.appendChild(li);
+        });
     }
 
     async function getFreshPdfDocument(file) {
@@ -166,5 +220,28 @@ export function initDropzone() {
             downloadPdf(newPdfBytes, `ruotato_${currentOriginalFiles[0].name}`);
         } catch (error) { alert("Errore rotazione."); } 
         finally { btnRotate.textContent = "Ruota"; }
+    });
+
+    // --- TOOL: SPLIT (Dividi) ---
+    btnSplit.addEventListener('click', async () => {
+        btnSplit.textContent = "Preparazione ZIP in corso...";
+        btnSplit.disabled = true;
+        
+        try {
+            const freshDoc = await getFreshPdfDocument(currentOriginalFiles[0]);
+            const originalName = currentOriginalFiles[0].name;
+            
+            // Creiamo il file ZIP contenente i PDF separati
+            const zipBlob = await splitPdf(freshDoc, originalName);
+            
+            // Scarichiamo il file ZIP
+            downloadBlob(zipBlob, `Diviso_${originalName.replace('.pdf', '')}.zip`);
+        } catch (error) {
+            console.error(error);
+            alert("Errore durante la divisione del PDF.");
+        } finally {
+            btnSplit.textContent = "Dividi e Scarica ZIP";
+            btnSplit.disabled = false;
+        }
     });
 }

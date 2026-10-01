@@ -6,7 +6,10 @@
     <title>PDF Toolbox - Strumenti PDF gratuiti e sicuri</title>
     <link rel="stylesheet" href="styles/main.css">
     <link rel="stylesheet" href="styles/components.css">
+    
+    <!-- Librerie esterne -->
     <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 </head>
 <body>
     <header>
@@ -17,11 +20,10 @@
     <main>
         <div id="dropzone" class="file-dropzone">
             <p>Trascina qui i tuoi file PDF oppure clicca per selezionarli</p>
-            <!-- Aggiunto l'attributo "multiple" -->
             <input type="file" id="file-input" accept="application/pdf" multiple hidden>
         </div>
 
-        <!-- VISTA SINGOLO FILE (Per Estrai, Elimina, Ruota) -->
+        <!-- VISTA SINGOLO FILE -->
         <div id="file-info" class="file-info" style="display: none;">
             <h3>Dettagli File:</h3>
             <p id="file-name"></p>
@@ -31,12 +33,21 @@
             <hr style="margin: 15px 0;">
             
             <div id="tools-section">
+                <!-- Strumenti Precedenti -->
                 <div style="margin-bottom: 20px;">
                     <h4>Estrai Pagine</h4>
                     <label>Da:</label> <input type="number" id="start-page" min="1" value="1" style="width: 50px;">
                     <label>A:</label> <input type="number" id="end-page" min="1" style="width: 50px;">
                     <button id="btn-extract">Estrai</button>
                 </div>
+                
+                <!-- NUOVO STRUMENTO: Dividi (Split) -->
+                <div style="margin-bottom: 20px;">
+                    <h4>Dividi in Pagine Singole</h4>
+                    <p style="font-size: 0.85em; color: #666; margin: 5px 0;">Estrae ogni pagina come PDF separato (scaricato come file ZIP).</p>
+                    <button id="btn-split">Dividi e Scarica ZIP</button>
+                </div>
+
                 <div style="margin-bottom: 20px;">
                     <h4>Elimina Pagine</h4>
                     <label>Pagine (es. 1, 3):</label> <input type="text" id="delete-pages" style="width: 100px;">
@@ -55,7 +66,7 @@
             </div>
         </div>
 
-        <!-- VISTA FILE MULTIPLI (Per il Merge) -->
+        <!-- VISTA FILE MULTIPLI (Merge) -->
         <div id="multi-file-info" class="file-info" style="display: none;">
             <h3>Coda di Unione (Merge):</h3>
             <ul id="file-list-ui" class="file-list"></ul>
