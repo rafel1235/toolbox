@@ -20,24 +20,24 @@ pdf-toolbox/
 │
 ├── src/
 │   │
-│   ├── index.html
+│   ├── index.html @
 │   ├── styles/
 │   │   ├── main.css
-│   │   ├── components.css
+│   │   ├── components.css @
 │   │   └── responsive.css
 │   │
 │   ├── js/
-│   │   ├── app.js
+│   │   ├── app.js @
 │   │   │
 │   │   ├── core/
-│   │   │   ├── file-handler.js
-│   │   │   ├── pdf-loader.js
+│   │   │   ├── file-handler.js @
+│   │   │   ├── pdf-loader.js @
 │   │   │   ├── pdf-export.js
 │   │   │   ├── download.js
 │   │   │   └── errors.js
 │   │   │
 │   │   ├── components/
-│   │   │   ├── file-dropzone.js
+│   │   │   ├── file-dropzone.js @
 │   │   │   ├── file-list.js
 │   │   │   ├── pdf-preview.js
 │   │   │   ├── page-grid.js
