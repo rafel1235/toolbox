@@ -7,8 +7,16 @@
     <link rel="stylesheet" href="styles/main.css">
     <link rel="stylesheet" href="styles/components.css">
     
+    <!-- Librerie essenziali -->
     <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    
+    <!-- NUOVO: Mozilla pdf.js per le anteprime -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>
+        // Configurazione vitale per il caricamento in background
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    </script>
 </head>
 <body>
     <header>
@@ -27,14 +35,25 @@
 
         <!-- VISTA SINGOLO FILE PDF -->
         <div id="file-info" class="file-info" style="display: none;">
-            <div class="file-header">
-                <h3>Documento Attivo</h3>
-                <div class="file-badges">
-                    <span id="file-name" class="badge badge-primary"></span>
-                    <span id="file-size" class="badge badge-secondary"></span>
-                    <span id="file-pages" class="badge badge-info"></span>
+            <div class="file-header" style="display: flex; gap: 20px; align-items: flex-start;">
+                <!-- NUOVO: Contenitore Anteprima -->
+                <div id="pdf-preview-container" class="pdf-preview-container" style="display: none;">
+                    <canvas id="pdf-preview-canvas"></canvas>
+                </div>
+                
+                <div>
+                    <h3>Documento Attivo</h3>
+                    <div class="file-badges">
+                        <span id="file-name" class="badge badge-primary"></span>
+                        <span id="file-size" class="badge badge-secondary"></span>
+                        <span id="file-pages" class="badge badge-info"></span>
+                    </div>
                 </div>
             </div>
+            
+            <!-- GRIGLIA STRUMENTI (LASCIA INVARIATA) -->
+            
+                <!-- ... tuoi tools attuali ... -->
             
             <!-- GRIGLIA STRUMENTI (Nuovo Layout) -->
             <div id="tools-section" class="tools-grid">

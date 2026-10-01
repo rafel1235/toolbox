@@ -39,7 +39,7 @@ pdf-toolbox/
 │   │   ├── components/
 │   │   │   ├── file-dropzone.js @
 │   │   │   ├── file-list.js
-│   │   │   ├── pdf-preview.js
+│   │   │   ├── pdf-preview.js @
 │   │   │   ├── page-grid.js
 │   │   │   ├── toolbar.js
 │   │   │   ├── progress.js

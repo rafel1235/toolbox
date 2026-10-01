@@ -7,6 +7,7 @@ import { mergePdfs } from '../tools/merge/merge.js';
 import { splitPdf } from '../tools/split/split.js';
 import { reorderPages } from '../tools/reorder/reorder.js';
 import { imagesToPdf } from '../tools/images-to-pdf/images-to-pdf.js';
+import { renderPdfPreview } from './pdf-preview.js';
 
 export function initDropzone() {
     const dropzone = document.getElementById('dropzone');
@@ -95,6 +96,9 @@ export function initDropzone() {
                 document.getElementById('end-page').max = maxPages;
                 document.getElementById('start-page').max = maxPages;
                 document.getElementById('rotate-page').max = maxPages;
+
+                // NUOVO: Disegniamo l'anteprima
+                renderPdfPreview(file);
             }
         } else if (currentOriginalFiles.length > 1) {
             // LOGICA MULTI PDF (Merge)
