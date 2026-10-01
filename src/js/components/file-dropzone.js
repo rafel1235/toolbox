@@ -5,6 +5,7 @@ import { deletePages } from '../tools/delete-pages/delete-pages.js';
 import { rotatePages } from '../tools/rotate/rotate.js';
 import { mergePdfs } from '../tools/merge/merge.js';
 import { splitPdf } from '../tools/split/split.js';
+import { reorderPages } from '../tools/reorder/reorder.js';
 
 export function initDropzone() {
     const dropzone = document.getElementById('dropzone');
@@ -27,6 +28,7 @@ export function initDropzone() {
     const btnMerge = document.getElementById('btn-merge');
     const btnClear = document.getElementById('btn-clear');
     const btnSplit = document.getElementById('btn-split');
+    const btnReorder = document.getElementById('btn-reorder');
 
     let currentOriginalFiles = [];
     let maxPages = 0;
@@ -224,5 +226,35 @@ export function initDropzone() {
             downloadPdf(newPdfBytes, `ruotato_${currentOriginalFiles[0].name}`);
         } catch (error) { alert("Errore rotazione."); } 
         finally { btnRotate.textContent = "Ruota"; }
+    });
+
+    // --- TOOL: RIORDINA (Reorder) ---
+    btnReorder.addEventListener('click', async () => {
+        const input = document.getElementById('reorder-pages').value;
+        // Convertiamo la stringa "3, 1, 2" in un array [3, 1, 2], scartando valori non numerici o fuori range
+        const pagesArray = input.split(',')
+            .map(n => parseInt(n.trim()))
+            .filter(n => !isNaN(n) && n >= 1 && n <= maxPages);
+        
+        if (pagesArray.length === 0) {
+            return alert("Inserisci un ordine valido (es. 3, 1, 2). Assicurati che le pagine esistano nel documento.");
+        }
+
+        btnReorder.textContent = "Elaborazione...";
+        btnReorder.disabled = true;
+        
+        try {
+            const freshDoc = await getFreshPdfDocument(currentOriginalFiles[0]);
+            const newPdfBytes = await reorderPages(freshDoc, pagesArray);
+            
+            // Scarichiamo il PDF riordinato
+            downloadPdf(newPdfBytes, `riordinato_${currentOriginalFiles[0].name}`);
+        } catch (error) { 
+            console.error(error);
+            alert("Errore durante il riordinamento delle pagine."); 
+        } finally { 
+            btnReorder.textContent = "Riordina"; 
+            btnReorder.disabled = false;
+        }
     });
 }
