@@ -1,0 +1,35 @@
+/* Stile per l'area di Drag & Drop */
+.file-dropzone {
+    border: 2px dashed #007bff;
+    border-radius: 8px;
+    padding: 40px;
+    text-align: center;
+    background-color: #f8f9fa;
+    color: #333;
+    cursor: pointer;
+    transition: background-color 0.3s, border-color 0.3s;
+    margin: 20px auto;
+    max-width: 600px;
+    font-family: sans-serif;
+}
+
+.file-dropzone.dragover {
+    background-color: #e2e6ea;
+    border-color: #0056b3;
+}
+
+.file-dropzone p {
+    margin: 0;
+    font-size: 1.1em;
+}
+
+/* Stile per le info del file */
+.file-info {
+    max-width: 600px;
+    margin: 20px auto;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #fff;
+    font-family: sans-serif;
+}

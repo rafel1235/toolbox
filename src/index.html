@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Toolbox - Strumenti PDF gratuiti e sicuri</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/components.css">
+    
+    <!-- Importiamo pdf-lib tramite CDN per le operazioni sui PDF -->
+    <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
+</head>
+<body>
+    <header>
+        <h1>PDF Toolbox</h1>
+        <p>Il tuo strumento PDF Local-first. Veloce, gratuito e rispettoso della privacy.</p>
+    </header>
+
+    <main>
+        <div id="dropzone" class="file-dropzone">
+            <p>Trascina qui il tuo file PDF oppure clicca per selezionarlo</p>
+            <input type="file" id="file-input" accept="application/pdf" hidden>
+        </div>
+
+        <!-- Aggiunto "Stato elaborazione" e "Numero di pagine" -->
+        <div id="file-info" class="file-info" style="display: none;">
+            <h3>Dettagli File:</h3>
+            <p id="file-name"></p>
+            <p id="file-size"></p>
+            <p id="file-pages"><em>Caricamento in corso...</em></p>
+        </div>
+    </main>
+
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>

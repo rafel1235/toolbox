@@ -1,0 +1,146 @@
+pdf-toolbox/
+│
+├── README.md
+├── LICENSE
+├── CONTRIBUTING.md
+├── SECURITY.md
+├── CHANGELOG.md
+├── .gitignore
+│
+├── docs/
+│   ├── architecture.md
+│   ├── privacy.md
+│   ├── security.md
+│   └── roadmap.md
+│
+├── public/
+│   ├── favicon.svg
+│   ├── icons/
+│   └── assets/
+│
+├── src/
+│   │
+│   ├── index.html
+│   ├── styles/
+│   │   ├── main.css
+│   │   ├── components.css
+│   │   └── responsive.css
+│   │
+│   ├── js/
+│   │   ├── app.js
+│   │   │
+│   │   ├── core/
+│   │   │   ├── file-handler.js
+│   │   │   ├── pdf-loader.js
+│   │   │   ├── pdf-export.js
+│   │   │   ├── download.js
+│   │   │   └── errors.js
+│   │   │
+│   │   ├── components/
+│   │   │   ├── file-dropzone.js
+│   │   │   ├── file-list.js
+│   │   │   ├── pdf-preview.js
+│   │   │   ├── page-grid.js
+│   │   │   ├── toolbar.js
+│   │   │   ├── progress.js
+│   │   │   └── notification.js
+│   │   │
+│   │   ├── tools/
+│   │   │   │
+│   │   │   ├── merge/
+│   │   │   │   └── merge.js
+│   │   │   │
+│   │   │   ├── split/
+│   │   │   │   └── split.js
+│   │   │   │
+│   │   │   ├── compress/
+│   │   │   │   └── compress.js
+│   │   │   │
+│   │   │   ├── rotate/
+│   │   │   │   └── rotate.js
+│   │   │   │
+│   │   │   ├── delete-pages/
+│   │   │   │   └── delete-pages.js
+│   │   │   │
+│   │   │   ├── extract/
+│   │   │   │   └── extract.js
+│   │   │   │
+│   │   │   ├── reorder/
+│   │   │   │   └── reorder.js
+│   │   │   │
+│   │   │   ├── duplicate/
+│   │   │   │   └── duplicate.js
+│   │   │   │
+│   │   │   ├── metadata/
+│   │   │   │   └── metadata.js
+│   │   │   │
+│   │   │   ├── flatten/
+│   │   │   │   └── flatten.js
+│   │   │   │
+│   │   │   ├── images-to-pdf/
+│   │   │   │   └── images-to-pdf.js
+│   │   │   │
+│   │   │   ├── pdf-to-images/
+│   │   │   │   └── pdf-to-images.js
+│   │   │   │
+│   │   │   ├── text-to-pdf/
+│   │   │   │   └── text-to-pdf.js
+│   │   │   │
+│   │   │   ├── scan/
+│   │   │   │   └── scanner.js
+│   │   │   │
+│   │   │   ├── ocr/
+│   │   │   │   ├── ocr.js
+│   │   │   │   └── searchable-pdf.js
+│   │   │   │
+│   │   │   ├── watermark/
+│   │   │   │   └── watermark.js
+│   │   │   │
+│   │   │   ├── page-numbers/
+│   │   │   │   └── page-numbers.js
+│   │   │   │
+│   │   │   ├── header-footer/
+│   │   │   │   └── header-footer.js
+│   │   │   │
+│   │   │   ├── crop/
+│   │   │   │   └── crop.js
+│   │   │   │
+│   │   │   ├── password/
+│   │   │   │   └── password.js
+│   │   │   │
+│   │   │   └── sign/
+│   │   │       └── sign.js
+│   │   │
+│   │   └── utils/
+│   │       ├── validation.js
+│   │       ├── format.js
+│   │       ├── storage.js
+│   │       └── helpers.js
+│   │
+│   └── pages/
+│       ├── home.html
+│       ├── merge.html
+│       ├── split.html
+│       ├── compress.html
+│       ├── rotate.html
+│       ├── scan.html
+│       └── ocr.html
+│
+├── tests/
+│   ├── core/
+│   └── tools/
+│       ├── merge.test.js
+│       ├── split.test.js
+│       ├── compress.test.js
+│       └── rotate.test.js
+│
+└── backend/
+    │
+    ├── README.md
+    ├── src/
+    │   ├── server.js
+    │   ├── routes/
+    │   ├── services/
+    │   └── utils/
+    │
+    └── tests/
