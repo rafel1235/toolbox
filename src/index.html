@@ -36,7 +36,6 @@
         <!-- VISTA SINGOLO FILE PDF -->
         <div id="file-info" class="file-info" style="display: none;">
             <div class="file-header" style="display: flex; gap: 20px; align-items: flex-start;">
-                <!-- NUOVO: Contenitore Anteprima -->
                 <div id="pdf-preview-container" class="pdf-preview-container" style="display: none;">
                     <canvas id="pdf-preview-canvas"></canvas>
                 </div>
@@ -50,13 +49,25 @@
                     </div>
                 </div>
             </div>
+
+            <!-- NUOVO: Modalità Visuale (Griglia Pagine) -->
+            <div class="visual-mode-section" style="margin-top: 20px; border-top: 1px solid #eee; padding-top: 20px;">
+                <h4>Gestione Visuale</h4>
+                <p class="tool-desc">Clicca sulle pagine per selezionarle, trascinale per riordinarle.</p>
+                
+                <!-- Il contenitore dove verrà disegnata la griglia -->
+                <div id="pdf-page-grid" class="page-grid-container"></div>
+                
+                <div class="action-bar" style="margin-top: 15px;">
+                    <button id="btn-visual-reorder" class="btn btn-primary">Applica Nuovo Ordine</button>
+                    <button id="btn-visual-delete" class="btn btn-danger" disabled>Elimina Selezionate</button>
+                </div>
+            </div>
             
-            <!-- GRIGLIA STRUMENTI (LASCIA INVARIATA) -->
-            
-                <!-- ... tuoi tools attuali ... -->
-            
-            <!-- GRIGLIA STRUMENTI (Nuovo Layout) -->
+            <!-- GRIGLIA STRUMENTI CLASSICA (Testuale) -->
+            <h4 style="margin-top: 30px; border-bottom: 1px solid #eee; padding-bottom: 10px;">Strumenti Avanzati</h4>
             <div id="tools-section" class="tools-grid">
+                <!-- Mantieni qui i tool-card esistenti (Estrai, Split, Elimina testuale, Ruota) -->
                 
                 <div class="tool-card">
                     <h4>Estrai Pagine</h4>

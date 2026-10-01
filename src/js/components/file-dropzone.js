@@ -8,6 +8,7 @@ import { splitPdf } from '../tools/split/split.js';
 import { reorderPages } from '../tools/reorder/reorder.js';
 import { imagesToPdf } from '../tools/images-to-pdf/images-to-pdf.js';
 import { renderPdfPreview } from './pdf-preview.js';
+import { renderPageGrid, getSelectedPages, getCurrentOrder } from './page-grid.js';
 
 export function initDropzone() {
     const dropzone = document.getElementById('dropzone');
@@ -99,6 +100,8 @@ export function initDropzone() {
 
                 // NUOVO: Disegniamo l'anteprima
                 renderPdfPreview(file);
+                // NUOVO: Generiamo la griglia interattiva
+                renderPageGrid(file, 'pdf-page-grid');
             }
         } else if (currentOriginalFiles.length > 1) {
             // LOGICA MULTI PDF (Merge)
@@ -297,4 +300,54 @@ export function initDropzone() {
             btnReorder.disabled = false;
         }
     });
+
+    // --- TOOLS VISUALI (Griglia) ---
+    const btnVisualReorder = document.getElementById('btn-visual-reorder');
+    const btnVisualDelete = document.getElementById('btn-visual-delete');
+
+    if (btnVisualReorder) {
+        btnVisualReorder.addEventListener('click', async () => {
+            const newOrder = getCurrentOrder();
+            if (newOrder.length === 0) return;
+
+            btnVisualReorder.textContent = "Elaborazione...";
+            btnVisualReorder.disabled = true;
+            try {
+                const freshDoc = await getFreshPdfDocument(currentOriginalFiles[0]);
+                const newPdfBytes = await reorderPages(freshDoc, newOrder);
+                downloadPdf(newPdfBytes, `riordinato_${currentOriginalFiles[0].name}`);
+            } catch (error) { 
+                alert("Errore riordinamento visuale."); 
+            } finally { 
+                btnVisualReorder.textContent = "Applica Nuovo Ordine"; 
+                btnVisualReorder.disabled = false;
+            }
+        });
+    }
+
+    if (btnVisualDelete) {
+        btnVisualDelete.addEventListener('click', async () => {
+            const pagesToDelete = getSelectedPages();
+            if (pagesToDelete.length === 0) return;
+
+            btnVisualDelete.textContent = "Elaborazione...";
+            btnVisualDelete.disabled = true;
+            try {
+                const freshDoc = await getFreshPdfDocument(currentOriginalFiles[0]);
+                const newPdfBytes = await deletePages(freshDoc, pagesToDelete);
+                downloadPdf(newPdfBytes, `ripulito_${currentOriginalFiles[0].name}`);
+                
+                // Opzionale: ricarica la griglia dopo l'eliminazione
+                // renderPageGrid(currentOriginalFiles[0], 'pdf-page-grid'); 
+            } catch (error) { 
+                alert("Errore eliminazione visuale."); 
+            } finally { 
+                btnVisualDelete.textContent = "Elimina Selezionate"; 
+                btnVisualDelete.disabled = false;
+                // Resetta selezione
+                const selectedItems = document.querySelectorAll('.page-grid-item.selected');
+                selectedItems.forEach(item => item.classList.remove('selected'));
+            }
+        });
+    }
 }

@@ -40,7 +40,7 @@ pdf-toolbox/
 │   │   │   ├── file-dropzone.js @
 │   │   │   ├── file-list.js
 │   │   │   ├── pdf-preview.js @
-│   │   │   ├── page-grid.js
+│   │   │   ├── page-grid.js @
 │   │   │   ├── toolbar.js
 │   │   │   ├── progress.js
 │   │   │   └── notification.js
