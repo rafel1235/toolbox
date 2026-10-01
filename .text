@@ -57,10 +57,10 @@ pdf-toolbox/
 │   │   │   │   └── compress.js
 │   │   │   │
 │   │   │   ├── rotate/
-│   │   │   │   └── rotate.js
+│   │   │   │   └── rotate.js @
 │   │   │   │
 │   │   │   ├── delete-pages/
-│   │   │   │   └── delete-pages.js
+│   │   │   │   └── delete-pages.js @
 │   │   │   │
 │   │   │   ├── extract/
 │   │   │   │   └── extract.js @
