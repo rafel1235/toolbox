@@ -148,6 +148,20 @@
                 <button id="btn-clear-images" class="btn btn-outline btn-clear">Svuota coda</button>
             </div>
         </div>
+
+        <!-- NUOVO: Lightbox per visualizzazione pagina singola -->
+        <div id="page-lightbox" class="lightbox-overlay" style="display: none;">
+            <div class="lightbox-content">
+                <div class="lightbox-header">
+                    <h3 id="lightbox-title">Pagina</h3>
+                    <button id="btn-close-lightbox" class="btn-close">&times;</button>
+                </div>
+                <div class="lightbox-body">
+                    <canvas id="lightbox-canvas"></canvas>
+                </div>
+            </div>
+        </div>
+        
     </main>
 
     <script type="module" src="js/app.js"></script>

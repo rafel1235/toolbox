@@ -248,3 +248,94 @@ input[type="number"]:focus, input[type="text"]:focus, select:focus {
 .page-grid-item.dragging {
     opacity: 0.5;
 }
+
+/* --- BOTTONE ZOOM SULLE MINIATURE --- */
+.zoom-btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background-color: rgba(255, 255, 255, 0.9);
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: 24px;
+    height: 24px;
+    font-size: 14px;
+    line-height: 1;
+    cursor: pointer;
+    display: none; /* Nascosto di default */
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* Mostra il bottone zoom solo quando il mouse passa sulla miniatura */
+.page-grid-item:hover .zoom-btn {
+    display: flex;
+}
+.zoom-btn:hover {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+
+/* --- LIGHTBOX MODALE --- */
+.lightbox-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(0, 0, 0, 0.85);
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.lightbox-content {
+    background-color: #fff;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    max-width: 90vw;
+    max-height: 95vh;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    overflow: hidden;
+}
+
+.lightbox-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.lightbox-header h3 {
+    margin: 0;
+    font-size: 1.1em;
+    color: #333;
+}
+
+.btn-close {
+    background: none;
+    border: none;
+    font-size: 1.5em;
+    cursor: pointer;
+    color: #666;
+    padding: 0 5px;
+}
+.btn-close:hover { color: #dc3545; }
+
+.lightbox-body {
+    padding: 20px;
+    overflow: auto; /* Permette lo scroll se l'immagine è troppo grande */
+    display: flex;
+    justify-content: center;
+    background-color: #e9ecef;
+}
+
+#lightbox-canvas {
+    max-width: 100%;
+    height: auto;
+    box-shadow: 0 0 10px rgba(0,0,0,0.2);
+}

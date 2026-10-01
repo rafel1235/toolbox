@@ -1,4 +1,4 @@
-// Gestisce la visualizzazione a griglia delle pagine del PDF per manipolazioni visuali
+// Gestisce la visualizzazione a griglia e la lightbox per le pagine del PDF
 
 let currentPdfDocument = null;
 let pageCanvases = [];
@@ -17,11 +17,11 @@ export async function renderPageGrid(file, containerId) {
         const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
         currentPdfDocument = await loadingTask.promise;
         
-        container.innerHTML = ''; // Pulisci il messaggio di caricamento
+        container.innerHTML = '';
         
         for (let pageNum = 1; pageNum <= currentPdfDocument.numPages; pageNum++) {
             const page = await currentPdfDocument.getPage(pageNum);
-            const viewport = page.getViewport({ scale: 0.3 }); // Scala ridotta per le miniature
+            const viewport = page.getViewport({ scale: 0.3 }); // Scala ridotta per miniatura
             
             const pageItem = document.createElement('div');
             pageItem.className = 'page-grid-item';
@@ -39,6 +39,19 @@ export async function renderPageGrid(file, containerId) {
             pageLabel.className = 'page-label';
             pageLabel.textContent = pageNum;
             
+            // NUOVO: Pulsante lente di ingrandimento
+            const zoomBtn = document.createElement('button');
+            zoomBtn.className = 'zoom-btn';
+            zoomBtn.innerHTML = '🔍'; // Icona lente
+            zoomBtn.title = "Visualizza pagina ingrandita";
+            
+            // Listener per il click sullo zoom (ferma la propagazione per non selezionare la pagina)
+            zoomBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                openLightbox(pageNum);
+            });
+            
+            pageItem.appendChild(zoomBtn);
             pageItem.appendChild(canvas);
             pageItem.appendChild(pageLabel);
             
@@ -53,7 +66,6 @@ export async function renderPageGrid(file, containerId) {
                 updateActionButtons();
             });
             
-            // Drag & Drop logic (simile a file-list.js)
             setupDragAndDrop(pageItem, container);
             
             container.appendChild(pageItem);
@@ -65,6 +77,51 @@ export async function renderPageGrid(file, containerId) {
     }
 }
 
+// NUOVO: Logica di apertura della Lightbox
+async function openLightbox(pageNum) {
+    if (!currentPdfDocument) return;
+    
+    const lightbox = document.getElementById('page-lightbox');
+    const title = document.getElementById('lightbox-title');
+    const canvas = document.getElementById('lightbox-canvas');
+    const ctx = canvas.getContext('2d');
+    
+    title.textContent = `Pagina ${pageNum}`;
+    lightbox.style.display = 'flex';
+    
+    try {
+        const page = await currentPdfDocument.getPage(pageNum);
+        // Scala molto più alta (1.5) per una lettura nitida
+        const viewport = page.getViewport({ scale: 1.5 });
+        
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
+        
+        await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+    } catch (error) {
+        console.error("Errore rendering lightbox:", error);
+        alert("Impossibile caricare l'anteprima ad alta risoluzione.");
+    }
+}
+
+// Inizializza la chiusura della lightbox (da chiamare una sola volta)
+function initLightboxEvents() {
+    const lightbox = document.getElementById('page-lightbox');
+    const closeBtn = document.getElementById('btn-close-lightbox');
+    
+    if (closeBtn && lightbox) {
+        closeBtn.addEventListener('click', () => lightbox.style.display = 'none');
+        // Chiudi cliccando fuori dall'immagine
+        lightbox.addEventListener('click', (e) => {
+            if (e.target === lightbox) lightbox.style.display = 'none';
+        });
+    }
+}
+
+// Chiamiamo l'inizializzazione subito quando il modulo viene caricato
+document.addEventListener('DOMContentLoaded', initLightboxEvents);
+
+
 function setupDragAndDrop(item, container) {
     item.addEventListener('dragstart', (e) => {
         item.classList.add('dragging');
@@ -73,7 +130,6 @@ function setupDragAndDrop(item, container) {
 
     item.addEventListener('dragend', () => {
         item.classList.remove('dragging');
-        updatePageOrder(container);
     });
 
     item.addEventListener('dragover', (e) => {
@@ -81,22 +137,13 @@ function setupDragAndDrop(item, container) {
         const draggingItem = container.querySelector('.dragging');
         if (draggingItem && draggingItem !== item) {
             const bounding = item.getBoundingClientRect();
-            const offset = bounding.y + (bounding.height / 2);
-            if (e.clientY - offset > 0) {
+            const offset = bounding.x + (bounding.width / 2); // Controllo orizzontale per la griglia
+            if (e.clientX - offset > 0) {
                 item.parentNode.insertBefore(draggingItem, item.nextSibling);
             } else {
                 item.parentNode.insertBefore(draggingItem, item);
             }
         }
-    });
-}
-
-function updatePageOrder(container) {
-    const items = container.querySelectorAll('.page-grid-item');
-    items.forEach((item, index) => {
-        // Opzionale: aggiornare visivamente le etichette per riflettere il nuovo ordine
-        // const label = item.querySelector('.page-label');
-        // label.textContent = index + 1; 
     });
 }
 
@@ -112,7 +159,6 @@ export function getCurrentOrder() {
     return Array.from(items).map(item => parseInt(item.dataset.pageNumber));
 }
 
-// Un placeholder per disabilitare/abilitare i bottoni in base alla selezione
 function updateActionButtons() {
     const btnVisualDelete = document.getElementById('btn-visual-delete');
     if (btnVisualDelete) {
