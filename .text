@@ -33,7 +33,7 @@ pdf-toolbox/
 │   │   │   ├── file-handler.js @
 │   │   │   ├── pdf-loader.js @
 │   │   │   ├── pdf-export.js
-│   │   │   ├── download.js
+│   │   │   ├── download.js @
 │   │   │   └── errors.js
 │   │   │
 │   │   ├── components/
@@ -63,7 +63,7 @@ pdf-toolbox/
 │   │   │   │   └── delete-pages.js
 │   │   │   │
 │   │   │   ├── extract/
-│   │   │   │   └── extract.js
+│   │   │   │   └── extract.js @
 │   │   │   │
 │   │   │   ├── reorder/
 │   │   │   │   └── reorder.js
