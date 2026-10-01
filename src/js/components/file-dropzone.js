@@ -1,16 +1,14 @@
 import { handleFile } from '../core/file-handler.js';
-import { downloadPdf } from '../core/download.js';
+import { downloadPdf, downloadBlob } from '../core/download.js';
 import { extractPages } from '../tools/extract/extract.js';
 import { deletePages } from '../tools/delete-pages/delete-pages.js';
 import { rotatePages } from '../tools/rotate/rotate.js';
 import { mergePdfs } from '../tools/merge/merge.js';
-import { downloadPdf, downloadBlob } from '../core/download.js'; // Aggiungi downloadBlob
-import { splitPdf } from '../tools/split/split.js'; // Nuovo import
+import { splitPdf } from '../tools/split/split.js';
 
 export function initDropzone() {
     const dropzone = document.getElementById('dropzone');
     const fileInput = document.getElementById('file-input');
-    const btnSplit = document.getElementById('btn-split');
     
     // UI Singolo File
     const fileInfoPanel = document.getElementById('file-info');
@@ -22,35 +20,43 @@ export function initDropzone() {
     const multiFileInfo = document.getElementById('multi-file-info');
     const fileListUi = document.getElementById('file-list-ui');
     
-    // Bottoni
+    // Bottoni Tools
     const btnExtract = document.getElementById('btn-extract');
     const btnDelete = document.getElementById('btn-delete');
     const btnRotate = document.getElementById('btn-rotate');
     const btnMerge = document.getElementById('btn-merge');
     const btnClear = document.getElementById('btn-clear');
+    const btnSplit = document.getElementById('btn-split');
 
-    let currentOriginalFiles = []; // Array per contenere tutti i file fisici caricati
+    let currentOriginalFiles = [];
     let maxPages = 0;
 
+    // --- 1. EVENTI DROPZONE BASE ---
     dropzone.addEventListener('click', () => fileInput.click());
 
     fileInput.addEventListener('change', (event) => {
         if (event.target.files.length > 0) processFiles(Array.from(event.target.files));
     });
 
-    dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('dragover'); });
+    dropzone.addEventListener('dragover', (e) => { 
+        e.preventDefault(); 
+        dropzone.classList.add('dragover'); 
+    });
+    
     dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+    
     dropzone.addEventListener('drop', (e) => {
         e.preventDefault();
         dropzone.classList.remove('dragover');
         if (e.dataTransfer.files.length > 0) processFiles(Array.from(e.dataTransfer.files));
     });
 
+    // --- 2. GESTIONE FILE E TRANSIZIONI UI ---
     async function processFiles(newFiles) {
         currentOriginalFiles = [...currentOriginalFiles, ...newFiles];
 
         if (currentOriginalFiles.length === 1) {
-            // LOGICA SINGOLO FILE
+            // Mostra UI singolo file
             multiFileInfo.style.display = 'none';
             fileInfoPanel.style.display = 'block';
             
@@ -70,64 +76,48 @@ export function initDropzone() {
                 document.getElementById('rotate-page').max = maxPages;
             }
         } else if (currentOriginalFiles.length > 1) {
-            // LOGICA FILE MULTIPLI (Merge)
+            // Mostra UI multi-file
             fileInfoPanel.style.display = 'none';
             multiFileInfo.style.display = 'block';
             
-            // Usiamo la nuova funzione per generare la lista riordinabile
             renderFileList();
         }
     }
 
-    // Nuova funzione per generare la lista interattiva
+    // --- 3. DRAG & DROP DELLA LISTA FILE (MERGE) ---
     function renderFileList() {
         fileListUi.innerHTML = '';
         
         currentOriginalFiles.forEach((file, index) => {
             const li = document.createElement('li');
             li.textContent = `${index + 1}. ${file.name}`;
-            li.draggable = true; // Rende l'elemento trascinabile
-            li.dataset.index = index; // Salviamo l'indice originale nell'HTML
+            li.draggable = true;
+            li.dataset.index = index;
 
-            // 1. Inizio trascinamento
             li.addEventListener('dragstart', (e) => {
                 li.classList.add('dragging');
-                // Salviamo l'indice dell'elemento che stiamo spostando
                 e.dataTransfer.setData('text/plain', index);
             });
 
-            // 2. Fine trascinamento
-            li.addEventListener('dragend', () => {
-                li.classList.remove('dragging');
-            });
+            li.addEventListener('dragend', () => li.classList.remove('dragging'));
 
-            // 3. Quando si passa sopra un altro elemento
             li.addEventListener('dragover', (e) => {
-                e.preventDefault(); // Necessario per permettere il drop
+                e.preventDefault();
                 li.classList.add('drag-over');
             });
 
-            // 4. Quando si esce dall'area di un altro elemento
-            li.addEventListener('dragleave', () => {
-                li.classList.remove('drag-over');
-            });
+            li.addEventListener('dragleave', () => li.classList.remove('drag-over'));
 
-            // 5. Rilascio (Drop)
             li.addEventListener('drop', (e) => {
                 e.preventDefault();
                 li.classList.remove('drag-over');
                 
-                // Recuperiamo l'indice di origine
                 const fromIndex = parseInt(e.dataTransfer.getData('text/plain'));
-                const toIndex = index; // Indice di destinazione (quello su cui abbiamo rilasciato)
+                const toIndex = index;
 
-                // Se l'elemento è stato effettivamente spostato in una posizione diversa
                 if (fromIndex !== toIndex && !isNaN(fromIndex)) {
-                    // Spostiamo l'elemento nell'array JavaScript
                     const movedItem = currentOriginalFiles.splice(fromIndex, 1)[0];
                     currentOriginalFiles.splice(toIndex, 0, movedItem);
-                    
-                    // Ridisegniamo la lista con il nuovo ordine
                     renderFileList();
                 }
             });
@@ -141,26 +131,21 @@ export function initDropzone() {
         return data.pdfDocument;
     }
 
-    // --- TOOL: MERGE ---
+    // --- 4. ASSEGNAZIONE BOTTONI TOOLS ---
+
+    // Tool: Unisci (Merge)
     btnMerge.addEventListener('click', async () => {
         btnMerge.textContent = "Unione in corso...";
         btnMerge.disabled = true;
-        
         try {
-            // 1. Convertiamo tutti i file fisici in documenti pdf-lib elaborati
             const pdfDocuments = [];
             for (const file of currentOriginalFiles) {
                 const doc = await getFreshPdfDocument(file);
                 pdfDocuments.push(doc);
             }
-            
-            // 2. Uniamo i documenti
             const mergedBytes = await mergePdfs(pdfDocuments);
-            
-            // 3. Scarichiamo il risultato
             downloadPdf(mergedBytes, 'PDF_Toolbox_Unito.pdf');
         } catch (error) {
-            console.error(error);
             alert("Errore durante l'unione dei PDF.");
         } finally {
             btnMerge.textContent = "Unisci tutti i PDF";
@@ -168,16 +153,15 @@ export function initDropzone() {
         }
     });
 
-    // --- TOOL: SVUOTA CODA ---
+    // Tool: Svuota Coda
     btnClear.addEventListener('click', () => {
         currentOriginalFiles = [];
-        fileInput.value = ""; // Resetta l'input file
+        fileInput.value = "";
         multiFileInfo.style.display = 'none';
         fileInfoPanel.style.display = 'none';
     });
 
-    // --- TOOLS SINGOLO FILE (Estrai, Elimina, Ruota) ---
-    // (Stesso codice precedente, adattato per usare currentOriginalFiles[0])
+    // Tool: Estrai
     btnExtract.addEventListener('click', async () => {
         const start = parseInt(document.getElementById('start-page').value);
         const end = parseInt(document.getElementById('end-page').value);
@@ -192,6 +176,25 @@ export function initDropzone() {
         finally { btnExtract.textContent = "Estrai"; }
     });
 
+    // Tool: Dividi (Split)
+    btnSplit.addEventListener('click', async () => {
+        btnSplit.textContent = "Preparazione ZIP...";
+        btnSplit.disabled = true;
+        try {
+            const freshDoc = await getFreshPdfDocument(currentOriginalFiles[0]);
+            const originalName = currentOriginalFiles[0].name;
+            const zipBlob = await splitPdf(freshDoc, originalName);
+            downloadBlob(zipBlob, `Diviso_${originalName.replace('.pdf', '')}.zip`);
+        } catch (error) {
+            console.error(error);
+            alert("Errore durante la divisione del PDF.");
+        } finally {
+            btnSplit.textContent = "Dividi e Scarica ZIP";
+            btnSplit.disabled = false;
+        }
+    });
+
+    // Tool: Elimina
     btnDelete.addEventListener('click', async () => {
         const input = document.getElementById('delete-pages').value;
         const pagesArray = input.split(',').map(n => parseInt(n.trim())).filter(n => !isNaN(n) && n >= 1 && n <= maxPages);
@@ -208,6 +211,7 @@ export function initDropzone() {
         finally { btnDelete.textContent = "Elimina"; }
     });
 
+    // Tool: Ruota
     btnRotate.addEventListener('click', async () => {
         const degrees = parseInt(document.getElementById('rotate-degrees').value);
         const pageInput = document.getElementById('rotate-page').value;
@@ -220,28 +224,5 @@ export function initDropzone() {
             downloadPdf(newPdfBytes, `ruotato_${currentOriginalFiles[0].name}`);
         } catch (error) { alert("Errore rotazione."); } 
         finally { btnRotate.textContent = "Ruota"; }
-    });
-
-    // --- TOOL: SPLIT (Dividi) ---
-    btnSplit.addEventListener('click', async () => {
-        btnSplit.textContent = "Preparazione ZIP in corso...";
-        btnSplit.disabled = true;
-        
-        try {
-            const freshDoc = await getFreshPdfDocument(currentOriginalFiles[0]);
-            const originalName = currentOriginalFiles[0].name;
-            
-            // Creiamo il file ZIP contenente i PDF separati
-            const zipBlob = await splitPdf(freshDoc, originalName);
-            
-            // Scarichiamo il file ZIP
-            downloadBlob(zipBlob, `Diviso_${originalName.replace('.pdf', '')}.zip`);
-        } catch (error) {
-            console.error(error);
-            alert("Errore durante la divisione del PDF.");
-        } finally {
-            btnSplit.textContent = "Dividi e Scarica ZIP";
-            btnSplit.disabled = false;
-        }
     });
 }
