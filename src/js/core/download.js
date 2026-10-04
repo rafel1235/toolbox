@@ -16,5 +16,5 @@ export function downloadBlob(blob, filename) {
     
     // Pulizia
     document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    setTimeout(() => URL.revokeObjectURL(url), 30000);
 }

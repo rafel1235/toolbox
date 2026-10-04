@@ -121,7 +121,7 @@
 .tool-controls .hint { font-size: .8rem; color: var(--muted); }
 
 /* ===== Input ===== */
-input[type="number"], input[type="text"], select {
+input[type="number"], input[type="text"], input[type="password"], select {
     padding: 8px 10px;
     border: 1px solid var(--line);
     border-radius: 8px;
@@ -237,6 +237,27 @@ input:focus, select:focus {
 }
 .page-grid-item:hover .zoom-btn { display: flex; }
 .zoom-btn:hover { background: var(--accent); color: #fff; }
+.zoom-btn { display: flex; }
+.eyebrow { font-size: .75rem; letter-spacing: .15em; font-weight: 700; color: var(--accent); }
+.trust-row { display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; margin-top: 24px; font-size: .8rem; color: var(--accent); }
+.trust-row span { background: var(--accent-soft); padding: 5px 12px; border-radius: 999px; }
+.hint { color: var(--muted); font-size: .8rem; }
+.status { padding: 14px 18px; border-radius: 8px; background: var(--accent-soft); overflow-wrap: anywhere; }
+.status.error { background: var(--danger-soft); color: var(--danger); }
+.password-details { margin-bottom: 20px; }
+summary { cursor: pointer; font-weight: 600; margin-bottom: 12px; }
+.tool-card h3 { font-size: 1rem; margin-bottom: 8px; }
+.tool-card .btn { margin-top: 16px; }
+.tool-controls input:not([type="checkbox"]), .tool-controls select { max-width: 100%; }
+.file-name-button { flex: 1; text-align: left; border: 0; background: none; color: var(--accent); font: inherit; cursor: pointer; overflow-wrap: anywhere; min-width: 0; }
+.file-name-button:disabled { color: var(--muted); cursor: default; }
+.queue-action { padding: 6px 8px; color: var(--ink); background: var(--subtle); border: 1px solid var(--line); border-radius: 6px; cursor: pointer; }
+pre { white-space: pre-wrap; overflow-wrap: anywhere; font: inherit; font-size: .8rem; }
+.redaction-scroll { margin-top: 20px; max-height: 650px; overflow: auto; background: var(--subtle); }
+#redaction-canvas { display: block; width: 100%; height: auto; touch-action: none; cursor: crosshair; }
+.privacy-note { margin-top: 40px; color: var(--muted); font-size: .9rem; }
+footer { padding: 24px; text-align: center; border-top: 1px solid var(--line); font-size: .8rem; color: var(--muted); }
+@media (max-width: 480px) { .file-list li { flex-wrap: wrap; } .file-name-button { flex-basis: 100%; } .tools-grid { grid-template-columns: minmax(0,1fr); } }
 
 /* ===== Lightbox ===== */
 .lightbox-overlay {

@@ -48,7 +48,9 @@ body {
     -webkit-font-smoothing: antialiased;
 }
 
-h1, h3, h4 { margin: 0; letter-spacing: -0.01em; }
+h1, h2, h3, h4 { margin: 0; letter-spacing: -0.01em; }
+h2 { font-size: 1.15rem; }
+[hidden] { display: none !important; }
 
 :focus-visible {
     outline: 2px solid var(--accent);

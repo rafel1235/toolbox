@@ -2,167 +2,82 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PDF Toolbox - Strumenti PDF gratuiti e sicuri</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="PrivatePDF: strumenti PDF gratuiti, senza account. Elabora i documenti direttamente nel browser.">
+    <meta name="referrer" content="no-referrer">
+    <title>PrivatePDF — I tuoi documenti restano tuoi</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="styles/main.css">
     <link rel="stylesheet" href="styles/components.css">
-
-    <!-- Librerie essenziali -->
-    <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-
-    <!-- Mozilla pdf.js per le anteprime -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-    <script>
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-    </script>
+    <script defer src="vendor/pdf-lib/dist/pdf-lib.min.js"></script>
+    <script defer src="vendor/jszip/dist/jszip.min.js"></script>
+    <script defer src="vendor/pdfjs-dist/build/pdf.min.js"></script>
+    <script type="module" src="js/app.js"></script>
 </head>
 <body>
     <header>
-        <h1>PDF Toolbox</h1>
-        <p>Il tuo strumento local-first. Veloce, gratuito e rispettoso della privacy.</p>
+        <p class="eyebrow">PRIVATEFILES EU / PRIVATEPDF</p>
+        <h1>I tuoi documenti.<br>Il tuo controllo.</h1>
+        <p>Prepara, pulisci e proteggi i PDF direttamente nel browser.<br>Gratuito, senza account e senza upload dei documenti.</p>
+        <div class="trust-row"><span>Elaborazione locale</span><span>Nessuna pubblicità</span><span>Nessun account</span></div>
     </header>
-
-    <main>
-        <div id="dropzone" class="file-dropzone" tabindex="0">
-            <div class="dropzone-content">
-                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
-                <p>Trascina qui i tuoi <strong>PDF</strong> o <strong>immagini</strong> (JPG/PNG)<br>oppure clicca per selezionarli</p>
-            </div>
-            <input type="file" id="file-input" accept="application/pdf, image/jpeg, image/png" multiple hidden>
+    <main id="workspace">
+        <div id="dropzone" class="file-dropzone" tabindex="0" role="button" aria-label="Seleziona PDF o immagini">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M12 12v6M9 15h6"/></svg>
+            <p><strong>Trascina qui PDF, JPG o PNG</strong><br>oppure clicca per selezionarli</p>
+            <p class="hint">Fino a 50 file · 200 MB per file · 500 MB per sessione</p>
+            <input type="file" id="file-input" accept=".pdf,.jpg,.jpeg,.png" multiple hidden>
         </div>
+        <details class="password-details"><summary>Il PDF ha una password di apertura?</summary><label for="open-password">Password per i prossimi PDF aggiunti</label><input id="open-password" type="password" autocomplete="off"><p class="hint">La password resta in memoria durante la sessione e serve anche per le anteprime.</p></details>
+        <p id="status" class="status" role="status" aria-live="polite">Scegli un file per iniziare. I documenti restano sul tuo dispositivo.</p>
 
-        <!-- VISTA SINGOLO FILE PDF -->
-        <div id="file-info" class="file-info" style="display: none;">
-            <div class="file-header with-preview">
-                <div id="pdf-preview-container" class="pdf-preview-container" style="display: none;">
-                    <canvas id="pdf-preview-canvas"></canvas>
-                </div>
-
-                <div>
-                    <h3>Documento attivo</h3>
-                    <div class="file-badges">
-                        <span id="file-name" class="badge badge-primary"></span>
-                        <span id="file-size" class="badge badge-secondary"></span>
-                        <span id="file-pages" class="badge badge-info"></span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Modalità visuale (griglia pagine) -->
-            <div class="section-block">
-                <h4>Gestione visuale</h4>
-                <p class="tool-desc">Clicca sulle pagine per selezionarle, trascinale per riordinarle.</p>
-
-                <div id="pdf-page-grid" class="page-grid-container"></div>
-
-                <div class="action-bar">
-                    <button id="btn-visual-reorder" class="btn btn-primary">Applica nuovo ordine</button>
-                    <button id="btn-visual-delete" class="btn btn-danger" disabled>Elimina selezionate</button>
-                </div>
-            </div>
-
-            <!-- Strumenti testuali -->
-            <div class="section-block">
-                <h4>Strumenti avanzati</h4>
-                <div id="tools-section" class="tools-grid">
-
-                    <div class="tool-card">
-                        <h4>Estrai pagine</h4>
-                        <p class="tool-desc">Salva un intervallo specifico di pagine in un nuovo PDF.</p>
-                        <div class="tool-controls">
-                            <label for="start-page">Da</label> <input type="number" id="start-page" min="1" value="1" class="input-small">
-                            <label for="end-page">A</label> <input type="number" id="end-page" min="1" class="input-small">
-                        </div>
-                        <button id="btn-extract" class="btn btn-primary">Estrai</button>
-                    </div>
-
-                    <div class="tool-card">
-                        <h4>Dividi</h4>
-                        <p class="tool-desc">Estrae ogni pagina del documento come PDF separato.</p>
-                        <div class="tool-controls">
-                            <span class="hint">Scarica un archivio .zip</span>
-                        </div>
-                        <button id="btn-split" class="btn btn-primary">Dividi e scarica ZIP</button>
-                    </div>
-
-                    <div class="tool-card">
-                        <h4>Elimina pagine</h4>
-                        <p class="tool-desc">Rimuovi le pagine indesiderate dal documento.</p>
-                        <div class="tool-controls">
-                            <label for="delete-pages">Pagine</label> <input type="text" id="delete-pages" placeholder="es. 1, 3" class="input-medium">
-                        </div>
-                        <button id="btn-delete" class="btn btn-danger">Elimina</button>
-                    </div>
-
-                    <div class="tool-card">
-                        <h4>Riordina pagine</h4>
-                        <p class="tool-desc">Crea un nuovo PDF cambiando l'ordine delle pagine.</p>
-                        <div class="tool-controls">
-                            <label for="reorder-pages">Ordine</label> <input type="text" id="reorder-pages" placeholder="es. 3, 1, 2" class="input-medium">
-                        </div>
-                        <button id="btn-reorder" class="btn btn-primary">Riordina</button>
-                    </div>
-
-                    <div class="tool-card">
-                        <h4>Ruota pagine</h4>
-                        <p class="tool-desc">Ruota l'intero documento o una singola pagina.</p>
-                        <div class="tool-controls">
-                            <select id="rotate-degrees" class="input-medium">
-                                <option value="90">90° destra</option>
-                                <option value="-90">90° sinistra</option>
-                                <option value="180">180°</option>
-                            </select>
-                            <input type="number" id="rotate-page" min="1" placeholder="Tutte" class="input-small">
-                        </div>
-                        <button id="btn-rotate" class="btn btn-primary">Ruota</button>
-                    </div>
-
-                </div>
-            </div>
-        </div>
-
-        <!-- VISTA MULTI FILE (Merge PDF) -->
-        <div id="multi-file-info" class="file-info" style="display: none;">
-            <div class="file-header">
-                <h3>Coda di unione</h3>
-                <p class="tool-desc">Trascina i file per riordinarli. Verranno uniti dall'alto verso il basso.</p>
-            </div>
+        <section id="queue-panel" class="file-info" hidden aria-label="File della sessione">
+            <h2 id="queue-count">File nella sessione</h2><p class="tool-desc">Scegli un PDF per modificarlo. Le frecce impostano l’ordine di unione e conversione.</p>
             <ul id="file-list-ui" class="file-list"></ul>
-            <div class="action-bar">
-                <button id="btn-merge" class="btn btn-success">Unisci tutti i PDF</button>
-                <button id="btn-clear" class="btn btn-outline btn-clear">Svuota coda</button>
-            </div>
-        </div>
+            <div class="action-bar"><button id="btn-merge" class="btn btn-primary">Unisci i PDF</button><button id="btn-images-to-pdf" class="btn btn-primary">Immagini → PDF</button><button id="btn-clear" class="btn btn-outline">Svuota sessione</button></div>
+            <details class="section-block"><summary>Elaborazione in blocco</summary><p class="tool-desc">Applica le impostazioni degli strumenti a tutti i PDF della coda. Eventuali errori sono elencati nello ZIP.</p>
+                <div class="tool-controls"><label for="batch-operation">Operazione</label><select id="batch-operation"><option value="metadata">Pulisci metadati</option><option value="compress">Comprimi</option><option value="watermark">Watermark</option><option value="protect">Proteggi con password</option><option value="numbers">Numera pagine</option><option value="flatten">Appiattisci moduli</option></select><button id="btn-batch" class="btn btn-success">Elabora e scarica ZIP</button></div>
+            </details>
+        </section>
 
-        <!-- VISTA IMMAGINI -->
-        <div id="image-info" class="file-info" style="display: none;">
-            <div class="file-header">
-                <h3>Coda immagini</h3>
-                <p class="tool-desc">Trascina le immagini per riordinarle. Verrà creata una pagina per ogni immagine.</p>
-            </div>
-            <ul id="image-list-ui" class="file-list"></ul>
-            <div class="action-bar">
-                <button id="btn-images-to-pdf" class="btn btn-success">Crea PDF dalle immagini</button>
-                <button id="btn-clear-images" class="btn btn-outline btn-clear">Svuota coda</button>
-            </div>
-        </div>
-
-        <!-- Lightbox per visualizzazione pagina singola -->
-        <div id="page-lightbox" class="lightbox-overlay" style="display: none;">
-            <div class="lightbox-content">
-                <div class="lightbox-header">
-                    <h3 id="lightbox-title">Pagina</h3>
-                    <button id="btn-close-lightbox" class="btn-close" aria-label="Chiudi">&times;</button>
+        <section id="file-info" class="file-info" hidden aria-label="PDF attivo">
+            <h2>Documento attivo</h2><div class="file-badges"><span id="file-name" class="badge badge-primary"></span><span id="file-size" class="badge"></span><span id="file-pages" class="badge"></span></div>
+            <p class="hint">Ogni operazione scarica una copia. Per continuare a modificare il risultato, aggiungilo alla sessione.</p>
+            <details class="section-block" open><summary>Organizza le pagine</summary><p class="tool-desc">Seleziona le pagine da eliminare. Trascina per riordinare; da tastiera usa Alt + freccia sinistra/destra.</p>
+                <div id="pdf-page-grid" class="page-grid-container"></div>
+                <div class="action-bar"><button id="btn-visual-reorder" class="btn btn-primary">Applica nuovo ordine</button><button id="btn-visual-delete" class="btn btn-danger">Elimina selezionate</button></div>
+            </details>
+            <div class="section-block"><h2>Strumenti PDF</h2><p class="tool-desc">Numeri e intervalli: 1, 3-5. Per watermark, lascia vuoto il campo per usare tutte le pagine.</p>
+                <div class="tool-controls"><label for="tool-pages">Pagine per watermark</label><input id="tool-pages" type="text" placeholder="Tutte le pagine"></div>
+                <div class="tools-grid">
+                    <article class="tool-card"><h3>Estrai pagine</h3><p class="tool-desc">Salva un intervallo in un nuovo documento.</p><div class="tool-controls"><label for="start-page">Da</label><input id="start-page" type="number" min="1" value="1" class="input-small"><label for="end-page">A</label><input id="end-page" type="number" min="1" class="input-small"></div><button id="btn-extract" class="btn btn-primary">Estrai</button></article>
+                    <article class="tool-card"><h3>Dividi PDF</h3><p class="tool-desc">Un PDF per pagina, raccolti in un archivio ZIP.</p><button id="btn-split" class="btn btn-primary">Dividi e scarica ZIP</button></article>
+                    <article class="tool-card"><h3>Elimina pagine</h3><p class="tool-desc">Rimuovi le pagine indicate.</p><div class="tool-controls"><label for="delete-pages">Pagine</label><input id="delete-pages" placeholder="1, 3-5" type="text" class="input-medium"></div><button id="btn-delete" class="btn btn-danger">Elimina</button></article>
+                    <article class="tool-card"><h3>Riordina pagine</h3><p class="tool-desc">Indica tutte le pagine una volta sola.</p><div class="tool-controls"><label for="reorder-pages">Ordine</label><input id="reorder-pages" placeholder="3, 1, 2" type="text" class="input-medium"></div><button id="btn-reorder" class="btn btn-primary">Riordina</button></article>
+                    <article class="tool-card"><h3>Estrai / duplica</h3><p class="tool-desc">Crea un documento da una selezione. Ripeti un numero per duplicare una pagina.</p><div class="tool-controls"><label for="duplicate-pages">Sequenza</label><input id="duplicate-pages" placeholder="1, 1, 3-5" type="text" class="input-medium"></div><button id="btn-duplicate" class="btn btn-primary">Crea selezione</button></article>
+                    <article class="tool-card"><h3>Ruota pagine</h3><p class="tool-desc">Lascia vuoto per ruotare tutte le pagine.</p><div class="tool-controls"><label for="rotate-degrees">Rotazione</label><select id="rotate-degrees"><option value="90">90° destra</option><option value="-90">90° sinistra</option><option value="180">180°</option></select><label for="rotate-page">Pagine</label><input id="rotate-page" type="text" placeholder="Tutte" class="input-medium"></div><button id="btn-rotate" class="btn btn-primary">Ruota</button></article>
+                    <article class="tool-card"><h3>Pulisci metadati</h3><p class="tool-desc">Rimuove proprietà descrittive e metadati XMP. Non anonimizza il contenuto, commenti o allegati.</p><details><summary>Metadati presenti</summary><pre id="metadata-info"></pre></details><button data-operation="metadata" class="btn btn-primary">Pulisci e scarica</button></article>
+                    <article class="tool-card"><h3>Comprimi PDF</h3><p class="tool-desc">L’ottimizzazione senza perdita può lasciare invariato un file già ottimizzato. La modalità scansione perde testo selezionabile, link e moduli.</p><div class="tool-controls"><label for="compression-mode">Modalità</label><select id="compression-mode"><option value="lossless">Ottimizza senza perdita</option><option value="raster">Scansione JPEG — con perdita</option></select></div><button data-operation="compress" class="btn btn-primary">Comprimi</button></article>
+                    <article class="tool-card"><h3>Watermark</h3><p class="tool-desc">Aggiungi una marcatura diagonale alle pagine scelte.</p><div class="tool-controls"><label for="watermark-text">Testo</label><input id="watermark-text" type="text" value="RISERVATO" maxlength="100"></div><button data-operation="watermark" class="btn btn-primary">Aggiungi watermark</button></article>
+                    <article class="tool-card"><h3>Proteggi con password</h3><p class="tool-desc">Cifratura AES-256. I permessi di stampa e copia dipendono dal lettore PDF.</p><div class="tool-controls"><label for="output-password">Nuova password (min. 8 caratteri)</label><input id="output-password" type="password" minlength="8" autocomplete="new-password"><label><input id="restrict-permissions" type="checkbox"> Limita stampa, copia e modifica</label></div><button data-operation="protect" class="btn btn-primary">Proteggi PDF</button></article>
+                    <article class="tool-card"><h3>Rimuovi password</h3><p class="tool-desc">Scarica una copia senza cifratura del documento aperto con la tua password.</p><button data-operation="unlock" class="btn btn-primary">Scarica senza password</button></article>
+                    <article class="tool-card"><h3>Numera pagine</h3><p class="tool-desc">Aggiungi numeri in fondo a ogni pagina.</p><div class="tool-controls"><label for="number-start">Numero iniziale</label><input id="number-start" type="number" value="1" min="1" class="input-small"></div><button data-operation="numbers" class="btn btn-primary">Numera</button></article>
+                    <article class="tool-card"><h3>Appiattisci moduli</h3><p class="tool-desc">Trasforma i campi compilati in contenuto statico. I campi non saranno più modificabili.</p><button data-operation="flatten" class="btn btn-primary">Appiattisci</button></article>
+                    <article class="tool-card"><h3>PDF → immagini</h3><p class="tool-desc">Esporta ogni pagina in PNG e scarica uno ZIP.</p><button id="btn-pdf-images" class="btn btn-primary">Esporta PNG</button></article>
+                    <article class="tool-card"><h3>OCR locale</h3><p class="tool-desc">Riconosci scansioni. ZIP con PDF ricercabile e testo. I modelli vengono caricati da questo sito; i file restano locali. Può richiedere alcuni minuti.</p><div class="tool-controls"><label for="ocr-language">Lingua</label><select id="ocr-language"><option value="ita">Italiano</option><option value="eng">Inglese</option><option value="ita+eng">Italiano + inglese</option></select></div><button id="btn-ocr" class="btn btn-primary">Riconosci testo</button></article>
+                    <article class="tool-card"><h3>Oscura dati sensibili</h3><p class="tool-desc">Seleziona aree visive da rimuovere. Il risultato è un PDF di immagini, senza testo nascosto, allegati o moduli originali. Controlla tutte le pagine prima di condividerlo.</p><button id="btn-redact-open" class="btn btn-danger">Seleziona aree</button></article>
                 </div>
-                <div class="lightbox-body">
-                    <canvas id="lightbox-canvas"></canvas>
-                </div>
             </div>
-        </div>
-
+            <section id="redaction-editor" class="section-block" hidden aria-label="Editor oscuramento">
+                <h2>Oscuramento permanente</h2><p>Trascina sul documento per tracciare un rettangolo. Ripeti su tutte le pagine necessarie.</p>
+                <div class="action-bar"><button id="redact-prev" class="btn btn-outline">Pagina precedente</button><span id="redaction-page"></span><button id="redact-next" class="btn btn-outline">Pagina successiva</button></div>
+                <div class="redaction-scroll"><canvas id="redaction-canvas" aria-label="Trascina per oscurare un’area"></canvas></div>
+                <p id="redaction-count"></p><div class="action-bar"><button id="redact-undo" class="btn btn-outline">Annulla ultima area</button><button id="btn-redact-save" class="btn btn-danger">Scarica PDF oscurato</button><button id="redact-close" class="btn btn-outline">Chiudi editor</button></div>
+            </section>
+        </section>
+        <section class="privacy-note"><h2>La privacy, in pratica</h2><p>Nessun documento viene caricato su un server. Librerie e modelli OCR vengono serviti dal sito. Non usiamo analytics, pubblicità o archivi persistenti dei documenti. Svuota la sessione o chiudi la pagina per rilasciare i file dalla memoria dell’app.</p><p>Modificare un PDF firmato può invalidarne la firma. Sono disponibili conversioni PDF ↔ immagini e OCR; conversioni Word/Excel e OCR avanzato non fanno parte di questa versione.</p></section>
+        <div id="page-lightbox" class="lightbox-overlay" style="display:none" role="dialog" aria-modal="true" aria-labelledby="lightbox-title"><div class="lightbox-content"><div class="lightbox-header"><h3 id="lightbox-title">Pagina</h3><button id="btn-close-lightbox" class="btn-close" aria-label="Chiudi anteprima">×</button></div><div class="lightbox-body"><canvas id="lightbox-canvas"></canvas></div></div></div>
     </main>
-
-    <script type="module" src="js/app.js"></script>
+    <footer>PrivatePDF · Parte di PrivateFiles EU · I tuoi file, sul tuo dispositivo.</footer>
 </body>
 </html>

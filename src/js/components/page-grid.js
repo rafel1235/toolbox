@@ -4,8 +4,20 @@ let currentPdfDocument = null;
 let pageCanvases = [];
 let selectedPages = new Set();
 let lightboxRenderTask = null;
+let lightboxFocus = null;
 
-export async function renderPageGrid(file, containerId) {
+export async function resetPageGrid() {
+    if (lightboxRenderTask) { lightboxRenderTask.cancel(); lightboxRenderTask = null; }
+    document.getElementById('page-lightbox').style.display = 'none';
+    const canvas = document.getElementById('lightbox-canvas');
+    canvas.width = canvas.height = 0;
+    if (currentPdfDocument) await currentPdfDocument.destroy();
+    currentPdfDocument = null;
+    pageCanvases = []; selectedPages.clear();
+    document.getElementById('pdf-page-grid').replaceChildren();
+}
+
+export async function renderPageGrid(file, containerId, password = '') {
     const container = document.getElementById(containerId);
     if (!container) return;
     
@@ -15,7 +27,7 @@ export async function renderPageGrid(file, containerId) {
 
     try {
         const arrayBuffer = await file.arrayBuffer();
-        const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
+        const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer, password, cMapUrl: 'vendor/pdfjs-dist/cmaps/', cMapPacked: true, standardFontDataUrl: 'vendor/pdfjs-dist/standard_fonts/', isEvalSupported: false });
         currentPdfDocument = await loadingTask.promise;
         
         container.innerHTML = '';
@@ -28,6 +40,10 @@ export async function renderPageGrid(file, containerId) {
             pageItem.className = 'page-grid-item';
             pageItem.draggable = true;
             pageItem.dataset.pageNumber = pageNum;
+            pageItem.tabIndex = 0;
+            pageItem.setAttribute('role', 'button');
+            pageItem.setAttribute('aria-label', `Seleziona pagina ${pageNum}`);
+            pageItem.setAttribute('aria-pressed', 'false');
             
             const canvas = document.createElement('canvas');
             canvas.height = viewport.height;
@@ -57,14 +73,21 @@ export async function renderPageGrid(file, containerId) {
             pageItem.appendChild(pageLabel);
             
             // Logica di selezione
-            pageItem.addEventListener('click', () => {
+            const toggle = () => {
                 pageItem.classList.toggle('selected');
                 if (selectedPages.has(pageNum)) {
                     selectedPages.delete(pageNum);
                 } else {
                     selectedPages.add(pageNum);
                 }
-                updateActionButtons();
+                pageItem.setAttribute('aria-pressed', String(selectedPages.has(pageNum)));
+            };
+            pageItem.addEventListener('click', toggle);
+            pageItem.addEventListener('keydown', event => {
+                if (event.target !== pageItem) return;
+                if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); toggle(); }
+                if (event.altKey && event.key === 'ArrowLeft' && pageItem.previousElementSibling) { event.preventDefault(); container.insertBefore(pageItem, pageItem.previousElementSibling); pageItem.focus(); }
+                if (event.altKey && event.key === 'ArrowRight' && pageItem.nextElementSibling) { event.preventDefault(); container.insertBefore(pageItem.nextElementSibling, pageItem); pageItem.focus(); }
             });
             
             setupDragAndDrop(pageItem, container);
@@ -87,7 +110,9 @@ async function openLightbox(pageNum) {
     const canvas = document.getElementById('lightbox-canvas');
 
     title.textContent = `Pagina ${pageNum}`;
+    lightboxFocus = document.activeElement;
     lightbox.style.display = 'flex';
+    document.getElementById('btn-close-lightbox').focus();
 
     // Annulla un render ancora in corso sullo stesso canvas
     if (lightboxRenderTask) {
@@ -132,10 +157,15 @@ function initLightboxEvents() {
     const closeBtn = document.getElementById('btn-close-lightbox');
     
     if (closeBtn && lightbox) {
-        closeBtn.addEventListener('click', () => lightbox.style.display = 'none');
+        const close = () => { lightbox.style.display = 'none'; lightboxFocus?.focus(); };
+        closeBtn.addEventListener('click', close);
         // Chiudi cliccando fuori dall'immagine
         lightbox.addEventListener('click', (e) => {
-            if (e.target === lightbox) lightbox.style.display = 'none';
+            if (e.target === lightbox) close();
+        });
+        document.addEventListener('keydown', event => {
+            if (event.key === 'Escape' && lightbox.style.display !== 'none') close();
+            if (event.key === 'Tab' && lightbox.style.display !== 'none') { event.preventDefault(); closeBtn.focus(); }
         });
     }
 }

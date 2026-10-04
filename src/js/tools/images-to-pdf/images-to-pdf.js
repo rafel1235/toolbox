@@ -10,13 +10,12 @@ export async function imagesToPdf(imageFiles) {
         let pdfImage;
         
         // Incorporiamo l'immagine nel PDF in base al formato
-        if (file.type === 'image/jpeg' || file.type === 'image/jpg') {
+        if (file.type === 'image/jpeg' || file.type === 'image/jpg' || /\.jpe?g$/i.test(file.name)) {
             pdfImage = await pdfDoc.embedJpg(imageBytes);
-        } else if (file.type === 'image/png') {
+        } else if (file.type === 'image/png' || /\.png$/i.test(file.name)) {
             pdfImage = await pdfDoc.embedPng(imageBytes);
         } else {
-            console.warn(`Formato non supportato ignorato: ${file.name}`);
-            continue; 
+            throw new Error(`Formato immagine non supportato: ${file.name}`);
         }
         
         // Otteniamo le dimensioni dell'immagine
