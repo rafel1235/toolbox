@@ -3,6 +3,7 @@
 let currentPdfDocument = null;
 let pageCanvases = [];
 let selectedPages = new Set();
+let lightboxRenderTask = null;
 
 export async function renderPageGrid(file, containerId) {
     const container = document.getElementById(containerId);
@@ -80,25 +81,46 @@ export async function renderPageGrid(file, containerId) {
 // NUOVO: Logica di apertura della Lightbox
 async function openLightbox(pageNum) {
     if (!currentPdfDocument) return;
-    
+
     const lightbox = document.getElementById('page-lightbox');
     const title = document.getElementById('lightbox-title');
     const canvas = document.getElementById('lightbox-canvas');
-    const ctx = canvas.getContext('2d');
-    
+
     title.textContent = `Pagina ${pageNum}`;
     lightbox.style.display = 'flex';
-    
+
+    // Annulla un render ancora in corso sullo stesso canvas
+    if (lightboxRenderTask) {
+        lightboxRenderTask.cancel();
+        lightboxRenderTask = null;
+    }
+
     try {
         const page = await currentPdfDocument.getPage(pageNum);
-        // Scala molto più alta (1.5) per una lettura nitida
-        const viewport = page.getViewport({ scale: 1.5 });
-        
-        canvas.height = viewport.height;
-        canvas.width = viewport.width;
-        
-        await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+        const base = page.getViewport({ scale: 1 });
+
+        // Adatta la pagina alla finestra, con risoluzione piena per lo schermo
+        const dpr = window.devicePixelRatio || 1;
+        const fitScale = Math.min(
+            (window.innerWidth * 0.85) / base.width,
+            (window.innerHeight * 0.8) / base.height
+        );
+        const cssScale = Math.max(fitScale, 1);
+        const viewport = page.getViewport({ scale: Math.min(cssScale, 3) * dpr });
+
+        canvas.width = Math.floor(viewport.width);
+        canvas.height = Math.floor(viewport.height);
+        canvas.style.width = `${viewport.width / dpr}px`;
+        canvas.style.height = `${viewport.height / dpr}px`;
+
+        lightboxRenderTask = page.render({
+            canvasContext: canvas.getContext('2d'),
+            viewport
+        });
+        await lightboxRenderTask.promise;
+        lightboxRenderTask = null;
     } catch (error) {
+        if (error?.name === 'RenderingCancelledException') return;
         console.error("Errore rendering lightbox:", error);
         alert("Impossibile caricare l'anteprima ad alta risoluzione.");
     }
