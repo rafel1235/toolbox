@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer">
+    <title>La tua dashboard — PrivatePDF</title><link rel="icon" href="favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="styles/main.css"><link rel="stylesheet" href="styles/components.css"><link rel="stylesheet" href="styles/account.css">
+    <script type="module" src="js/dashboard.js"></script>
+</head>
+<body>
+    <nav class="topbar" aria-label="Navigazione principale"><a class="brand" href="/">Private<span>PDF</span></a><div id="account-nav" class="nav-links"></div></nav>
+    <main class="dashboard-layout">
+        <p id="dashboard-status" class="form-status" role="status" aria-live="polite">Caricamento della tua dashboard…</p>
+        <div id="dashboard-content" hidden>
+            <section class="dashboard-heading"><div><p class="eyebrow">LA TUA DASHBOARD</p><h1 id="greeting">Ciao.</h1><p>Il tuo spazio per preparare, pulire e proteggere i documenti.</p></div><a href="/" class="btn btn-primary tool-link">Apri il toolbox →</a></section>
+            <section class="stats-grid" aria-label="Statistiche personali"><article class="stat-card"><span>Operazioni completate</span><strong id="total-operations">0</strong></article><article class="stat-card"><span>Negli ultimi 30 giorni</span><strong id="month-operations">0</strong></article><article class="stat-card"><span>Elaborazione documenti</span><strong class="stat-label">Locale</strong><small>Nessun PDF salvato nel tuo account</small></article></section>
+            <section class="dashboard-section"><div class="section-heading"><h2>Da dove vuoi iniziare?</h2><span class="badge badge-primary">Tutti gli strumenti gratuiti</span></div><div class="quick-tools"><a href="/#dropzone"><strong>Organizza i PDF</strong><span>Unisci, dividi e riordina le pagine.</span></a><a href="/#tools-section"><strong>Pulisci e proteggi</strong><span>Metadati, password e oscuramento.</span></a><a href="/#tools-section"><strong>Converti e riconosci</strong><span>Immagini, compressione e OCR.</span></a></div></section>
+            <div class="dashboard-columns">
+                <section class="dashboard-section activity-panel"><div class="section-heading"><h2>Attività recenti</h2><button id="refresh-dashboard" class="text-button">Aggiorna</button></div><p class="hint">Solo operazione e data. Nessun nome o contenuto del documento. Dettagli conservati per 90 giorni.</p><div id="activity-empty" class="empty-state"><strong>La tua prima attività ti aspetta.</strong><p>Completa un’operazione nel toolbox mentre sei connesso e la ritroverai qui.</p><a href="/">Inizia con un PDF →</a></div><ul id="activity-list" class="activity-list"></ul><button id="clear-history" class="text-button danger-text">Cancella cronologia</button><div id="history-confirmation" class="confirmation" hidden><p>Cancellare tutta la cronologia e azzerare i contatori?</p><button id="confirm-clear" class="btn btn-danger">Sì, cancella</button><button id="cancel-clear" class="btn btn-outline">Annulla</button></div></section>
+                <section id="profile" class="dashboard-section"><h2>Il tuo profilo</h2><p id="profile-email" class="profile-email"></p><p class="hint">Membro dal <span id="member-since"></span></p><form id="profile-form"><label for="profile-name">Nome visualizzato</label><input id="profile-name" minlength="2" maxlength="80" autocomplete="name" required><button id="save-profile" class="btn btn-primary">Salva profilo</button></form><details class="section-block"><summary>Cambia password</summary><form id="password-form"><label for="current-password">Password attuale</label><input id="current-password" type="password" autocomplete="current-password" maxlength="128" required><label for="new-password">Nuova password</label><input id="new-password" type="password" autocomplete="new-password" minlength="12" maxlength="128" required><label for="new-password-confirm">Conferma nuova password</label><input id="new-password-confirm" type="password" autocomplete="new-password" minlength="12" maxlength="128" required><p class="hint">Il cambio password disconnette tutte le sessioni, inclusa questa.</p><button id="save-password" class="btn btn-primary">Aggiorna password</button></form></details><button id="logout" class="btn btn-outline logout-button">Esci dall’account</button></section>
+            </div>
+        </div>
+    </main><footer>PrivatePDF · I tuoi documenti restano sul tuo dispositivo.</footer>
+</body>
+</html>

@@ -11,6 +11,7 @@ import { cleanMetadata, watermark, protect, flatten, numberPages } from '../tool
 import { rasterPdf, exportImages, ocr } from '../tools/raster-tools.js';
 import { renderPageGrid, getSelectedPages, getCurrentOrder, resetPageGrid } from './page-grid.js';
 import { initRedaction } from './redaction.js';
+import { activityTypes } from '../core/activity-types.js';
 
 const $ = id => document.getElementById(id);
 export function initDropzone() {
@@ -22,14 +23,18 @@ export function initDropzone() {
     const fresh = async file => { if (!file) throw new Error('Seleziona un PDF.'); return (await loadPdf(file, passwords.get(file) || '')).document; };
     const selected = doc => pageList(value('tool-pages'), doc.getPageCount(), { all: true });
 
-    async function run(action, success = 'Operazione completata. Il risultato è stato scaricato.') {
+    async function run(action, success = 'Operazione completata. Il risultato è stato scaricato.', operation = null) {
         if (busy) return false;
         busy = true;
         const controls = [...document.querySelectorAll('button, input, select')], disabled = controls.map(control => control.disabled);
         controls.forEach(control => control.disabled = true);
         $('workspace').setAttribute('aria-busy', 'true');
         progress('in corso…');
-        try { await action(); status(success); return true; }
+        try {
+            await action(); status(success);
+            if (operation && Object.hasOwn(activityTypes, operation)) document.dispatchEvent(new CustomEvent('privatepdf:activity', { detail: { operation } }));
+            return true;
+        }
         catch (error) { status(error.message || 'Operazione non riuscita.', true); return false; }
         finally {
             controls.forEach((control, i) => { if (control.isConnected) control.disabled = disabled[i]; });
@@ -86,7 +91,7 @@ export function initDropzone() {
     $('dropzone').addEventListener('dragover', event => { event.preventDefault(); if (!busy) $('dropzone').classList.add('dragover'); });
     $('dropzone').addEventListener('dragleave', () => $('dropzone').classList.remove('dragover'));
     $('dropzone').addEventListener('drop', event => { event.preventDefault(); $('dropzone').classList.remove('dragover'); if (!busy) addFiles([...event.dataTransfer.files]); });
-    const bind = (id, action, success) => $(id).addEventListener('click', () => run(action, success));
+    const bind = (id, action, success) => $(id).addEventListener('click', () => run(action, success, id));
     bind('btn-clear', async () => { files = []; passwords.clear(); await activate(null); renderQueue(); $('output-password').value = ''; $('open-password').value = ''; }, 'Sessione svuotata.');
     const operations = {
         metadata: async (file, doc) => cleanMetadata(doc).save(),
@@ -109,7 +114,7 @@ export function initDropzone() {
         const file = active, operation = button.dataset.operation;
         downloadPdf(await operations[operation](file, await fresh(file)), `${operation}_${file.name}`);
         if (operation === 'protect') $('output-password').value = '';
-    })));
+    }, undefined, button.dataset.operation)));
     bind('btn-extract', async () => {
         const doc = await fresh(active), start = Number(value('start-page')), end = Number(value('end-page'));
         if (!Number.isInteger(start) || !Number.isInteger(end)) throw new Error('Inserisci un intervallo valido.');

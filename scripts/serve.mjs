@@ -2,11 +2,15 @@ import http from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
+import { createAccounts } from '../server/accounts.mjs';
 const root = path.resolve(fileURLToPath(new URL('../src/', import.meta.url)));
 const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.wasm': 'application/wasm', '.json': 'application/json', '.bcmap': 'application/octet-stream', '.ttf': 'font/ttf', '.pfb': 'application/octet-stream' };
-export function createServer() {
-    return http.createServer(async (request, response) => {
+export function createServer(options = {}) {
+    const accounts = createAccounts(options);
+    const server = http.createServer(async (request, response) => {
         try {
+            const pathname = new URL(request.url, 'http://localhost').pathname;
+            if (await accounts.handle(request, response, pathname)) return;
             if (!['GET', 'HEAD'].includes(request.method)) { response.writeHead(405); response.end(); return; }
             const name = decodeURIComponent(new URL(request.url, 'http://localhost').pathname);
             const file = path.resolve(root, '.' + (name === '/' ? '/index.html' : name));
@@ -21,8 +25,10 @@ export function createServer() {
             response.end(request.method === 'HEAD' ? undefined : bytes);
         } catch { response.writeHead(404); response.end('File non trovato'); }
     });
+    server.on('close', () => accounts.close());
+    return server;
 }
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
     const port = Number(process.env.PORT || 4173);
-    createServer().listen(port, '127.0.0.1', () => console.log(`PrivatePDF: http://127.0.0.1:${port}`));
+    createServer({ databasePath: process.env.DATABASE_PATH, publicOrigin: process.env.PUBLIC_ORIGIN, secureCookies: process.env.NODE_ENV === 'production' }).listen(port, process.env.HOST || '127.0.0.1', () => console.log(`PrivatePDF: http://127.0.0.1:${port}`));
 }

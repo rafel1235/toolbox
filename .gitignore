@@ -2,3 +2,5 @@ node_modules/
 tmp/
 test-results/
 __pycache__/
+data/
+.env

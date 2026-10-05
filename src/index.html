@@ -9,12 +9,14 @@
     <link rel="icon" href="favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="styles/main.css">
     <link rel="stylesheet" href="styles/components.css">
+    <link rel="stylesheet" href="styles/account.css">
     <script defer src="vendor/pdf-lib/dist/pdf-lib.min.js"></script>
     <script defer src="vendor/jszip/dist/jszip.min.js"></script>
     <script defer src="vendor/pdfjs-dist/build/pdf.min.js"></script>
     <script type="module" src="js/app.js"></script>
 </head>
 <body>
+    <nav class="topbar" aria-label="Navigazione principale"><a class="brand" href="/">Private<span>PDF</span></a><div id="account-nav" class="nav-links"><a href="/account.html">Accedi</a><a href="/account.html?mode=register">Crea account</a></div></nav>
     <header>
         <p class="eyebrow">PRIVATEFILES EU / PRIVATEPDF</p>
         <h1>I tuoi documenti.<br>Il tuo controllo.</h1>
@@ -49,7 +51,7 @@
             </details>
             <div class="section-block"><h2>Strumenti PDF</h2><p class="tool-desc">Numeri e intervalli: 1, 3-5. Per watermark, lascia vuoto il campo per usare tutte le pagine.</p>
                 <div class="tool-controls"><label for="tool-pages">Pagine per watermark</label><input id="tool-pages" type="text" placeholder="Tutte le pagine"></div>
-                <div class="tools-grid">
+                <div id="tools-section" class="tools-grid">
                     <article class="tool-card"><h3>Estrai pagine</h3><p class="tool-desc">Salva un intervallo in un nuovo documento.</p><div class="tool-controls"><label for="start-page">Da</label><input id="start-page" type="number" min="1" value="1" class="input-small"><label for="end-page">A</label><input id="end-page" type="number" min="1" class="input-small"></div><button id="btn-extract" class="btn btn-primary">Estrai</button></article>
                     <article class="tool-card"><h3>Dividi PDF</h3><p class="tool-desc">Un PDF per pagina, raccolti in un archivio ZIP.</p><button id="btn-split" class="btn btn-primary">Dividi e scarica ZIP</button></article>
                     <article class="tool-card"><h3>Elimina pagine</h3><p class="tool-desc">Rimuovi le pagine indicate.</p><div class="tool-controls"><label for="delete-pages">Pagine</label><input id="delete-pages" placeholder="1, 3-5" type="text" class="input-medium"></div><button id="btn-delete" class="btn btn-danger">Elimina</button></article>
@@ -75,7 +77,7 @@
                 <p id="redaction-count"></p><div class="action-bar"><button id="redact-undo" class="btn btn-outline">Annulla ultima area</button><button id="btn-redact-save" class="btn btn-danger">Scarica PDF oscurato</button><button id="redact-close" class="btn btn-outline">Chiudi editor</button></div>
             </section>
         </section>
-        <section class="privacy-note"><h2>La privacy, in pratica</h2><p>Nessun documento viene caricato su un server. Librerie e modelli OCR vengono serviti dal sito. Non usiamo analytics, pubblicità o archivi persistenti dei documenti. Svuota la sessione o chiudi la pagina per rilasciare i file dalla memoria dell’app.</p><p>Modificare un PDF firmato può invalidarne la firma. Sono disponibili conversioni PDF ↔ immagini e OCR; conversioni Word/Excel e OCR avanzato non fanno parte di questa versione.</p></section>
+        <section class="privacy-note"><h2>La privacy, in pratica</h2><p>Nessun documento viene caricato su un server. Librerie e modelli OCR vengono serviti dal sito. Non usiamo analytics, pubblicità o archivi persistenti dei documenti. Svuota la sessione o chiudi la pagina per rilasciare i file dalla memoria dell’app.</p><p>L’account è facoltativo: conserva nome, email e cronologia di tipo e data delle operazioni, senza nomi o contenuto dei file. Puoi cancellare la cronologia dalla dashboard.</p><p>Modificare un PDF firmato può invalidarne la firma. Sono disponibili conversioni PDF ↔ immagini e OCR; conversioni Word/Excel e OCR avanzato non fanno parte di questa versione.</p></section>
         <div id="page-lightbox" class="lightbox-overlay" style="display:none" role="dialog" aria-modal="true" aria-labelledby="lightbox-title"><div class="lightbox-content"><div class="lightbox-header"><h3 id="lightbox-title">Pagina</h3><button id="btn-close-lightbox" class="btn-close" aria-label="Chiudi anteprima">×</button></div><div class="lightbox-body"><canvas id="lightbox-canvas"></canvas></div></div></div>
     </main>
     <footer>PrivatePDF · Parte di PrivateFiles EU · I tuoi file, sul tuo dispositivo.</footer>

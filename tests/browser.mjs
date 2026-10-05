@@ -17,7 +17,7 @@ await writeFile('test-results/input.pdf', await fixture.save());
 const scan = await PDFLib.PDFDocument.create();
 scan.addPage([600, 400]).drawText('PRIVATE DOCUMENT', { x: 45, y: 200, size: 38 });
 await writeFile('test-results/ocr-input.pdf', await scan.save());
-const server = createServer();
+const server = createServer({ databasePath: ':memory:' });
 await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
 const url = `http://127.0.0.1:${server.address().port}`;
 let browser;

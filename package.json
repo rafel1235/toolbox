@@ -5,8 +5,9 @@
   "type": "module",
   "scripts": {
     "start": "node scripts/serve.mjs",
-    "test": "node --test tests/core.test.mjs",
-    "test:browser": "node tests/browser.mjs"
+    "test": "node --test tests/core.test.mjs tests/accounts.test.mjs",
+    "test:browser": "node tests/browser.mjs && node tests/accounts-browser.mjs"
   },
+  "engines": { "node": ">=22.13.0" },
   "devDependencies": { "playwright": "1.58.2" }
 }

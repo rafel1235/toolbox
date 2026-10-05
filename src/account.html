@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer">
+    <title>Account — PrivatePDF</title><link rel="icon" href="favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="styles/main.css"><link rel="stylesheet" href="styles/components.css"><link rel="stylesheet" href="styles/account.css">
+    <script type="module" src="js/account.js"></script>
+</head>
+<body>
+    <nav class="topbar" aria-label="Navigazione principale"><a class="brand" href="/">Private<span>PDF</span></a><div id="account-nav" class="nav-links"><a href="/">Apri toolbox</a></div></nav>
+    <main class="account-layout">
+        <section class="account-story"><p class="eyebrow">IL TUO SPAZIO PRIVATEPDF</p><h1>Un account.<br>Più continuità.</h1><p>Il tuo profilo, le attività recenti e tutti gli strumenti PDF a portata di mano.</p><ul class="account-benefits"><li>Una dashboard personale</li><li>Cronologia delle operazioni</li><li>I documenti elaborati sul tuo dispositivo</li></ul><p class="hint">Puoi sempre usare il <a href="/">toolbox senza account</a>.</p></section>
+        <section class="account-card" aria-labelledby="account-title"><h2 id="account-title">Il tuo account</h2><p id="account-description">Accedi o registrati per aprire la tua dashboard.</p>
+            <form id="account-form">
+                <div id="register-fields" hidden><label for="account-name">Nome</label><input id="account-name" name="name" autocomplete="name" minlength="2" maxlength="80" required disabled></div>
+                <label for="account-email">Email</label><input id="account-email" name="email" type="email" autocomplete="email" maxlength="254" required>
+                <label for="account-password">Password</label><input id="account-password" name="password" type="password" autocomplete="current-password" maxlength="128" required>
+                <div id="confirm-field" hidden><label for="confirm-password">Conferma password</label><input id="confirm-password" type="password" autocomplete="new-password" maxlength="128" required disabled><p class="hint">Usa almeno 12 caratteri. Una frase lunga è facile da ricordare.</p></div>
+                <button id="show-password" class="text-button" type="button" aria-pressed="false">Mostra password</button>
+                <p id="account-status" class="form-status" role="status" aria-live="polite"></p>
+                <button id="submit-account" class="btn btn-primary" type="submit">Accedi</button>
+            </form>
+            <a id="account-switch" class="account-switch" href="/account.html?mode=register">Non hai un account? Registrati</a>
+            <p class="hint">Con l’account salvi nome, email e tipi di operazioni eseguite. Il contenuto e i nomi dei PDF restano locali. La cronologia è cancellabile dalla dashboard.</p>
+        </section>
+    </main>
+    <footer>PrivatePDF · Il tuo spazio per preparare documenti in privato.</footer>
+</body>
+</html>
